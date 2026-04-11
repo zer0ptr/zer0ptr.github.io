@@ -389,15 +389,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
-          前世今生之Hijack Got
+        <a href="/2026/02/07/offbyone/" target="_self">
+          花与堆之offbyone
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/02/07/offbyone/" target="_self">
         <div>
-          原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的
+          Description off-by-one漏洞是一种特殊的缓冲区溢出漏洞，其特殊之处在于off-by-one漏洞仅允许溢出一个字节，且该溢出字节未必是可控的。off-by-one漏洞常见于以下两种情况：  错误地设置了循环的边界（如将”&lt;“误写为”&lt;&#x3D;“）； 错误地使用了字符串处理函数字符串处理函数&amp;zhida_source&#x3D;entity)（不同的字符串处
         </div>
       </a>
 
@@ -405,8 +405,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-01-24 00:00" pubdate>
-              2026-01-24
+            <time datetime="2026-02-07 00:00" pubdate>
+              2026-02-07
             </time>
           </div>
         
@@ -421,7 +421,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
+  <a href="/categories/Heap/" class="category-chain-item">Heap</a>
   
   
 
@@ -436,9 +436,133 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
+              <a href="/tags/Heap/">#Heap</a>
             
-              <a href="/tags/Pwn/">#Pwn</a>
+              <a href="/tags/%E5%A0%86/">#堆</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/02/06/heap_glibc_malloc_chunk/" target="_self">
+          花与堆之堆基础-glibc_malloc_chunk,bin,threading,arena,system_call
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/02/06/heap_glibc_malloc_chunk/" target="_self">
+        <div>
+          glibc_malloc_chunkOverview在程序的执行过程中，我们称由 malloc 申请的内存为 chunk 。这块内存在 ptmalloc 内部用 malloc_chunk 结构体来表示。当程序申请的 chunk 被 free 后，会被加入到相应的空闲管理列表中。无论chunk的大小、状态如何，他们都是使用同一数据结构——malloc_chunk，只不过是表现形式有所不同。   ma
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-02-06 00:00" pubdate>
+              2026-02-06
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Heap/" class="category-chain-item">Heap</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Heap/">#Heap</a>
+            
+              <a href="/tags/%E5%A0%86/">#堆</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/01/30/rain/" target="_self">
+          恋音と雨空
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/30/rain/" target="_self">
+        <div>
+          「好きだよ」と伝えればいいのに願う先、怖くていえず「好きだよ」と「好きだよ」が募っては溶けてく君との時間が一秒でも長くなるならずっとじゃなくていい願いかける　恋音と雨空君と離れてから数日目の土砂降りの雨の中こんな日は必ず傘を届けにいったいつもの待ち合わせの場所いるはずのない面影待つ傘もささず、ずぶ濡れな君はそこにいた悴んだ手を温めることがもう一度できるなら始まりの時まで戻りたい「好きだよ」と伝えれ
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-01-30 00:00" pubdate>
+              2026-01-30
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E6%9D%82%E8%A8%80%E7%A2%8E%E8%AF%AD/" class="category-chain-item">杂言碎语</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E9%9B%A8%E5%A4%A9/">#雨天</a>
             
           </div>
         
@@ -528,6 +652,69 @@
       <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
         <div>
           原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-01-24 00:00" pubdate>
+              2026-01-24
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+          前世今生之Hijack Got
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+        <div>
+          原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的
         </div>
       </a>
 

@@ -21,27 +21,22 @@
   
     <meta name="description" content="Operating System Kernel操作系统内核（Operation System Kernel）本质上也是一种软件，可以看作是普通应用程式与硬件之间的一层中间层，其主要作用便是调度系统资源、控制 IO 设备、操作网络与文件系统等，并为上层应用提供便捷、抽象的应用接口。  操作系统内核实际上是我们抽象出来的一个概念，本质上与用户进程一般无二，都是位于物理内存中的代码 + 数据，不同之处在">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Kernel Pwn：基础知识">
+<meta property="og:title" content="【PWN.0x10】Linux Kernel Pwn：Basic Knowledge">
 <meta property="og:url" content="https://zer0ptr.github.io/2026/04/11/kernel-basic-knowledge/index.html">
 <meta property="og:site_name" content="花時雨的流水账">
 <meta property="og:description" content="Operating System Kernel操作系统内核（Operation System Kernel）本质上也是一种软件，可以看作是普通应用程式与硬件之间的一层中间层，其主要作用便是调度系统资源、控制 IO 设备、操作网络与文件系统等，并为上层应用提供便捷、抽象的应用接口。  操作系统内核实际上是我们抽象出来的一个概念，本质上与用户进程一般无二，都是位于物理内存中的代码 + 数据，不同之处在">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/Kernel_Layout.svg">
 <meta property="og:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/ring_model.png">
-<meta property="og:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/mm_layout_32.png">
-<meta property="og:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/mm_layout_64.png">
-<meta property="og:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/task_struct.png">
-<meta property="og:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/kpti.png">
-<meta property="og:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/freelist_random.png">
 <meta property="article:published_time" content="2026-04-11T14:55:41.000Z">
-<meta property="article:modified_time" content="2026-04-11T15:01:02.576Z">
+<meta property="article:modified_time" content="2026-04-18T02:54:56.445Z">
 <meta property="article:author" content="花時雨">
+<meta property="article:tag" content="kernel pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/Kernel_Layout.svg">
+<meta name="twitter:image" content="https://ctf-wiki.org/pwn/linux/kernel-mode/figure/ring_model.png">
   
   
   
-  <title>Kernel Pwn：基础知识 - 花時雨的流水账</title>
+  <title>【PWN.0x10】Linux Kernel Pwn：Basic Knowledge - 花時雨的流水账</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -366,7 +361,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Kernel Pwn：基础知识"></span>
+            <span id="subtitle" data-typed-text="【PWN.0x10】Linux Kernel Pwn：Basic Knowledge"></span>
           
         </div>
 
@@ -439,7 +434,7 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Kernel Pwn：基础知识</h1>
+            <h1 id="seo-header">【PWN.0x10】Linux Kernel Pwn：Basic Knowledge</h1>
             
             
               <div class="markdown-body">
@@ -689,6 +684,34 @@
             <div>
               <div class="post-metas my-3">
   
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/kernel-pwn/" class="print-no-link">#kernel pwn</a>
+      
+    </div>
   
 </div>
 
@@ -698,7 +721,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Kernel Pwn：基础知识</div>
+      <div>【PWN.0x10】Linux Kernel Pwn：Basic Knowledge</div>
       <div>https://zer0ptr.github.io/2026/04/11/kernel-basic-knowledge/</div>
     </div>
     <div class="license-meta">
@@ -743,12 +766,18 @@
                   <article class="post-prev col-6">
                     
                     
+                      <a href="/2026/04/18/kernel-env/" title="【PWN.0x11】Linux Kernel Pwn：Environment Build">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">【PWN.0x11】Linux Kernel Pwn：Environment Build</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/04/11/do-not-regret/" title="碎碎念：其實人冇可能每一步都正確">
-                        <span class="hidden-mobile">碎碎念：其實人冇可能每一步都正確</span>
+                      <a href="/2026/04/06/largebin-attack/" title="【PWN.0x09】Linux Heap PWN：Large Bin Attack">
+                        <span class="hidden-mobile">【PWN.0x09】Linux Heap PWN：Large Bin Attack</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

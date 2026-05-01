@@ -27,9 +27,8 @@
 <meta property="og:description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zer0ptr.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/hitcontraining-unlink/1.png">
 <meta property="article:published_time" content="2026-02-11T04:28:00.000Z">
-<meta property="article:modified_time" content="2026-04-24T13:40:59.024Z">
+<meta property="article:modified_time" content="2026-05-01T16:21:56.632Z">
 <meta property="article:author" content="花時雨">
 <meta property="article:tag" content="Pwn">
 <meta property="article:tag" content="堆">
@@ -704,7 +703,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>更新于</div>
-          <div>2026年4月24日</div>
+          <div>2026年5月2日</div>
         </div>
       
       

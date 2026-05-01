@@ -26,17 +26,15 @@
 <meta property="og:site_name" content="花時雨的流水账">
 <meta property="og:description" content="原理Use After Free即其字面所表达的意思，当一个内存块被释放之后再次被使用。但是其实这里有以下几种情况：  内存块被释放后，其对应的指针被设置为 NULL ， 然后再次使用，自然程序会崩溃。 内存块被释放后，其对应的指针没有被设置为 NULL ，然后在它下一次被使用之前，没有代码对这块内存块进行修改，那么程序很有可能可以正常运转。 内存块被释放后，其对应的指针没有被设置为 NULL，但">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zer0ptr.github.io/images/uaf-hitcon-lab10/magic.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/uaf-hitcon-lab10/uaf_exp.png">
 <meta property="og:image" content="https://zer0ptr.github.io/images/uaf-hitcon-lab10/getshell.png">
 <meta property="article:published_time" content="2026-02-20T07:21:23.000Z">
-<meta property="article:modified_time" content="2026-04-24T13:41:33.867Z">
+<meta property="article:modified_time" content="2026-05-01T16:19:35.321Z">
 <meta property="article:author" content="花時雨">
-<meta property="article:tag" content="Pwn">
 <meta property="article:tag" content="Heap">
+<meta property="article:tag" content="Pwn">
 <meta property="article:tag" content="UAF">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://zer0ptr.github.io/images/uaf-hitcon-lab10/magic.png">
+<meta name="twitter:image" content="https://zer0ptr.github.io/images/uaf-hitcon-lab10/getshell.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
@@ -626,9 +624,9 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Pwn/" class="print-no-link">#Pwn</a>
-      
         <a href="/tags/Heap/" class="print-no-link">#Heap</a>
+      
+        <a href="/tags/Pwn/" class="print-no-link">#Pwn</a>
       
         <a href="/tags/UAF/" class="print-no-link">#UAF</a>
       
@@ -661,7 +659,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>更新于</div>
-          <div>2026年4月24日</div>
+          <div>2026年5月2日</div>
         </div>
       
       

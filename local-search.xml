@@ -70,9 +70,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>Large Bin Attack</tag>
       
@@ -99,9 +99,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>Unsorted Bin Attack</tag>
       
@@ -128,9 +128,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>Fastbin</tag>
       
@@ -157,9 +157,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>UAF</tag>
       

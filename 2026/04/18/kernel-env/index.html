@@ -21,14 +21,14 @@
   
     <meta name="description" content="内核源码下载与编译要完成对 Linux 内核的漏洞利用与调试等，我们首先需要搭建一个可用的 Linux 运行环境。本节主要讲述如何获取内核源码并编译生成内核镜像文件（bzImage），我们将在下一节讲述如何利用 bzImage 和 BusyBox 搭起一个简易的运行环境。  相比于直接从Wiki上复制粘贴，我这里还补充了其中遇到的一些坑。  下载内核源码The Linux Kernel Archi">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【PWN.0x11】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module">
+<meta property="og:title" content="【PWN.0x0B】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module">
 <meta property="og:url" content="https://zer0ptr.github.io/2026/04/18/kernel-env/index.html">
 <meta property="og:site_name" content="花時雨的流水账">
 <meta property="og:description" content="内核源码下载与编译要完成对 Linux 内核的漏洞利用与调试等，我们首先需要搭建一个可用的 Linux 运行环境。本节主要讲述如何获取内核源码并编译生成内核镜像文件（bzImage），我们将在下一节讲述如何利用 bzImage 和 BusyBox 搭起一个简易的运行环境。  相比于直接从Wiki上复制粘贴，我这里还补充了其中遇到的一些坑。  下载内核源码The Linux Kernel Archi">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zer0ptr.github.io/images/banner/kernel-env.png">
 <meta property="article:published_time" content="2026-04-18T02:25:30.000Z">
-<meta property="article:modified_time" content="2026-05-01T16:49:36.407Z">
+<meta property="article:modified_time" content="2026-05-02T03:15:51.026Z">
 <meta property="article:author" content="花時雨">
 <meta property="article:tag" content="kernel pwn">
 <meta name="twitter:card" content="summary_large_image">
@@ -38,7 +38,7 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>【PWN.0x11】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module - 花時雨的流水账</title>
+  <title>【PWN.0x0B】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module - 花時雨的流水账</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -392,7 +392,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="【PWN.0x11】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module"></span>
+            <span id="subtitle" data-typed-text="【PWN.0x0B】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module"></span>
           
         </div>
 
@@ -465,7 +465,7 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">【PWN.0x11】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module</h1>
+            <h1 id="seo-header">【PWN.0x0B】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module</h1>
             
             
               <div class="markdown-body">
@@ -682,7 +682,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>【PWN.0x11】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module</div>
+      <div>【PWN.0x0B】Linux Kernel Pwn：Environment Build - Kernel Compilation and Create a Loadable Kernel Module</div>
       <div>https://zer0ptr.github.io/2026/04/18/kernel-env/</div>
     </div>
     <div class="license-meta">
@@ -732,12 +732,18 @@
                   <article class="post-prev col-6">
                     
                     
+                      <a href="/2026/05/02/kernel-qemu-emulate/" title="【PWN.0x0C】Linux Kernel Pwn：Environment Build - Set up a Kernel Runtime Environment">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">【PWN.0x0C】Linux Kernel Pwn：Environment Build - Set up a Kernel Runtime Environment</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/04/11/kernel-basic-knowledge/" title="【PWN.0x10】Linux Kernel Pwn：Basic Knowledge">
-                        <span class="hidden-mobile">【PWN.0x10】Linux Kernel Pwn：Basic Knowledge</span>
+                      <a href="/2026/04/11/kernel-basic-knowledge/" title="【PWN.0x0A】Linux Kernel Pwn：Basic Knowledge">
+                        <span class="hidden-mobile">【PWN.0x0A】Linux Kernel Pwn：Basic Knowledge</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

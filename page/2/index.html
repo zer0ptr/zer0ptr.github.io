@@ -213,6 +213,18 @@
           
           
             <li class="nav-item">
+              <a class="nav-link" href="/suisuinian/" target="_self">
+                <i class="iconfont icon-books"></i>
+                <span>碎碎念</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
               <a class="nav-link" href="https://github.com/zer0ptr" target="_self">
                 <i class="iconfont icon-github-fill"></i>
                 <span>Github</span>
@@ -331,6 +343,20 @@
           
         
           
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/suisuinian/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-books"></i>
+                  <span>碎碎念</span>
+                </div>
+              </a>
+            </div>
+          
+        
           
           
           
@@ -558,73 +584,6 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2026/01/30/rain/" target="_self">
-          <img src="/images/banner/avatar.jpg" srcset="/img/loading.gif" lazyload alt="恋音と雨空">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2026/01/30/rain/" target="_self">
-          恋音と雨空
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt " href="/2026/01/30/rain/" target="_self">
-        <div>
-          「好きだよ」と伝えればいいのに願う先、怖くていえず「好きだよ」と「好きだよ」が募っては溶けてく君との時間が一秒でも長くなるならずっとじゃなくていい願いかける　恋音と雨空君と離れてから数日目の土砂降りの雨の中こんな日は必ず傘を届けにいったいつもの待ち合わせの場所いるはずのない面影待つ傘もささず、ずぶ濡れな君はそこにいた悴んだ手を温めることがもう一度できるなら始まりの時まで戻りたい「好きだよ」と伝えれ
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-01-30 00:00" pubdate>
-              2026-01-30
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/%E6%9D%82%E8%A8%80%E7%A2%8E%E8%AF%AD/" class="category-chain-item">杂言碎语</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E9%9B%A8%E5%A4%A9/">#雨天</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
         <a href="/2026/01/24/RefleXGenThe_unexamined_code_is_not_worth_using/" target="_self">
           <img src="/images/banner/reflexgen.png" srcset="/img/loading.gif" lazyload alt="【论文笔记】RefleXGen：The unexamined code is not worth using">
         </a>
@@ -698,23 +657,23 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
-          <img src="/images/hijack-retaddr/1.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x01】Linux PWN：Hijack retaddr">
+        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+          <img src="/images/banner/hijackgot.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x02】Linux PWN：Hijack Got">
         </a>
       </div>
     
     <article class="col-12 col-md-8 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
-          【PWN.0x01】Linux PWN：Hijack retaddr
+        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+          【PWN.0x02】Linux PWN：Hijack Got
         </a>
       </h2>
 
       
-      <a class="index-excerpt " href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+      <a class="index-excerpt " href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
         <div>
-          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
+          原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的
         </div>
       </a>
 
@@ -767,23 +726,23 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
-          <img src="/images/banner/hijackgot.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x02】Linux PWN：Hijack Got">
+        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+          <img src="/images/hijack-retaddr/1.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x01】Linux PWN：Hijack retaddr">
         </a>
       </div>
     
     <article class="col-12 col-md-8 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
-          【PWN.0x02】Linux PWN：Hijack Got
+        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+          【PWN.0x01】Linux PWN：Hijack retaddr
         </a>
       </h2>
 
       
-      <a class="index-excerpt " href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+      <a class="index-excerpt " href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
         <div>
-          原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的
+          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
         </div>
       </a>
 
@@ -1020,7 +979,6 @@
       <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
     </span>
   </nav>
-
 
 
               </div>

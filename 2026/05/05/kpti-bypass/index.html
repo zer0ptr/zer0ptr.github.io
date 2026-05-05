@@ -1,0 +1,1092 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/SecNL.jpg">
+  <link rel="icon" href="/img/SecNL.jpg">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="花時雨">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="随着笔者在binary不断地深入，才愈发觉得这一领域的很多文章都是或多或少地不说人话，因此记录笔记的初衷是希望能记录些有价值的文字，总结出有用地东西，可愈发觉得自己也变成那种自己所讨厌的“不说人话”般的文字的输出者了。。。 0x00 System call and return method 本章不关注系统调用函数的参数，以及返回值，只关注系统调用指令本身。这里就拿经典的 int 0x80 与 s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【PWN.0x0E】Linux Kernel Pwn：Kernel ROP with KPTI bypass">
+<meta property="og:url" content="https://zer0ptr.github.io/2026/05/05/kpti-bypass/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:description" content="随着笔者在binary不断地深入，才愈发觉得这一领域的很多文章都是或多或少地不说人话，因此记录笔记的初衷是希望能记录些有价值的文字，总结出有用地东西，可愈发觉得自己也变成那种自己所讨厌的“不说人话”般的文字的输出者了。。。 0x00 System call and return method 本章不关注系统调用函数的参数，以及返回值，只关注系统调用指令本身。这里就拿经典的 int 0x80 与 s">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zer0ptr.github.io/images/kpti-bypass/banner.png">
+<meta property="article:published_time" content="2026-05-05T05:29:25.000Z">
+<meta property="article:modified_time" content="2026-05-05T06:31:06.162Z">
+<meta property="article:author" content="花時雨">
+<meta property="article:tag" content="Pwn">
+<meta property="article:tag" content="CTF">
+<meta property="article:tag" content="Kernel ROP">
+<meta property="article:tag" content="Kernel Pwn">
+<meta property="article:tag" content="KPTI bypass">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zer0ptr.github.io/images/kpti-bypass/banner.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>【PWN.0x0E】Linux Kernel Pwn：Kernel ROP with KPTI bypass - 花時雨的流水账</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zer0ptr.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>花時雨的流水账</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/suisuinian/" target="_self">
+                <i class="iconfont icon-books"></i>
+                <span>碎碎念</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="https://github.com/zer0ptr" target="_self">
+                <i class="iconfont icon-github-fill"></i>
+                <span>Github</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/suisuinian/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-books"></i>
+                  <span>碎碎念</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="https://github.com/zer0ptr" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-github-fill"></i>
+                  <span>Github</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【PWN.0x0E】Linux Kernel Pwn：Kernel ROP with KPTI bypass"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-05-05 13:29" pubdate>
+          2026年5月5日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          95 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【PWN.0x0E】Linux Kernel Pwn：Kernel ROP with KPTI bypass</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>随着笔者在binary不断地深入，才愈发觉得这一领域的很多文章都是或多或少地不说人话，因此记录笔记的初衷是希望能记录些有价值的文字，总结出有用地东西，可愈发觉得自己也变成那种自己所讨厌的“不说人话”般的文字的输出者了。。。</p>
+<h2 id="0x00-System-call-and-return-method"><a href="#0x00-System-call-and-return-method" class="headerlink" title="0x00 System call and return method"></a>0x00 System call and return method</h2><blockquote>
+<p>本章不关注系统调用函数的参数，以及返回值，只关注系统调用指令本身。<br>这里就拿经典的 int 0x80 与 syscall 来说</p>
+</blockquote>
+<h3 id="int-0x80"><a href="#int-0x80" class="headerlink" title="int 0x80"></a>int 0x80</h3><p>int 0x80是传统的系统调用，它过中断&#x2F;异常实现，在执行 int 指令时，发生 trap。硬件根据向量号0x80找到在中断描述符表中的表项，在自动切换到内核栈 (tss.ss0 : tss.esp0) 后根据中断描述符的 segment selector 在 GDT &#x2F; LDT 中找到对应的段描述符，从段描述符拿到段的基址，加载到 cs ，将 offset 加载到 eip。最后硬件将用户态ss &#x2F; sp &#x2F; eflags &#x2F; cs &#x2F; ip &#x2F; error code 依次压到内核栈。然后会执行eip的entry函数，通常在保存一系列寄存器后会SET_KERNEL_GS设置内核GS。</p>
+<p>返回时，最后会执行SWAPGS交换内核和用户GS寄存器，然后执行iret指令将先前压栈的 ss &#x2F; sp &#x2F; eflags &#x2F; cs &#x2F; ip 弹出，恢复用户态调用时的寄存器上下文。</p>
+<p>总结一下：在提权时，如要使用64 位的iretq指令 从内核态返回到用户态，我们首先要执行SWAPGS切换GS，然后执行iretq指令时的栈布局应该如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">rsp ---&gt; rip <br>         cs<br>         rflags<br>         rsp<br>         ss<br></code></pre></td></tr></table></figure>
+
+<h3 id="syscall"><a href="#syscall" class="headerlink" title="syscall"></a>syscall</h3><p>根据 Intel SDM，syscall 指令执行时会将当前 rip（syscall的下一条指令地址） 存到 rcx ，将 rflags 保存到 r11 中。 然后使用MSR寄存器中的 IA32_FMASK 屏蔽 rflags，将 IA32_LSTAR 加载到 rip (entry_SYSCALL_64)，同时将 IA32_STAR[47:32] 加载到 cs，IA32_STAR[47:32] + 8 加载到 ss (在 GDT 中，ss 就跟在 cs 后面)。</p>
+<p>其中的 MSR IA32_LSTAR (MSR_LSTAR) 和 IA32_STAR (MSR_STAR) 在 arch&#x2F;x86&#x2F;kernel&#x2F;cpu&#x2F;common.c 的 syscall_init 中初始化：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">syscall_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    wrmsr(MSR_STAR, <span class="hljs-number">0</span>, (__USER32_CS &lt;&lt; <span class="hljs-number">16</span>) | __KERNEL_CS);<br>    wrmsrl(MSR_LSTAR, (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>)entry_SYSCALL_64);<br><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_IA32_EMULATION</span><br>    wrmsrl(MSR_CSTAR, (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>)entry_SYSCALL_compat);<br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * This only works on Intel CPUs.</span><br><span class="hljs-comment">     * On AMD CPUs these MSRs are 32-bit, CPU truncates MSR_IA32_SYSENTER_EIP.</span><br><span class="hljs-comment">     * This does not cause SYSENTER to jump to the wrong location, because</span><br><span class="hljs-comment">     * AMD doesn&#x27;t allow SYSENTER in long mode (either 32- or 64-bit).</span><br><span class="hljs-comment">     */</span><br>    wrmsrl_safe(MSR_IA32_SYSENTER_CS, (u64)__KERNEL_CS);<br>    wrmsrl_safe(MSR_IA32_SYSENTER_ESP, <span class="hljs-number">0ULL</span>);<br>    wrmsrl_safe(MSR_IA32_SYSENTER_EIP, (u64)entry_SYSENTER_compat);<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>    wrmsrl(MSR_CSTAR, (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>)ignore_sysret);<br>    wrmsrl_safe(MSR_IA32_SYSENTER_CS, (u64)GDT_ENTRY_INVALID_SEG);<br>    wrmsrl_safe(MSR_IA32_SYSENTER_ESP, <span class="hljs-number">0ULL</span>);<br>    wrmsrl_safe(MSR_IA32_SYSENTER_EIP, <span class="hljs-number">0ULL</span>);<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><br>    <span class="hljs-comment">/* Flags to clear on syscall */</span><br>    wrmsrl(MSR_SYSCALL_MASK,<br>           X86_EFLAGS_TF|X86_EFLAGS_DF|X86_EFLAGS_IF|<br>           X86_EFLAGS_IOPL|X86_EFLAGS_AC|X86_EFLAGS_NT);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>MSR_STAR 的 high 32位中，低16位（bits 32-47）存储内核代码段选择子，高16位（bits 48-63）存储用户代码段选择子。这里的 __USER32_CS 是32位用户代码段选择子，而 __KERNEL_CS 是内核代码段选择子。SYSCALL 指令在从用户态切换到内核态时，会使用 bits 48-63 的值来设置 CS 和 SS；从内核态返回用户态时，会使用 bits 32-47 的值。</p>
+<p>于是 syscall 时，跳转到 entry_SYSCALL_64 开始执行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c">ENTRY(entry_SYSCALL_64)<br> <span class="hljs-comment">/* SWAPGS_UNSAFE_STACK是一个宏，x86直接定义为swapgs指令 */</span><br> SWAPGS_UNSAFE_STACK<br><br> <span class="hljs-comment">/* 保存栈值，并设置内核栈 */</span><br> movq %rsp, PER_CPU_VAR(rsp_scratch)<br> movq <span class="hljs-title function_">PER_CPU_VAR</span><span class="hljs-params">(cpu_current_top_of_stack)</span>, %rsp<br><br><br><span class="hljs-comment">/* 通过push保存寄存器值，形成一个pt_regs结构 */</span><br><span class="hljs-comment">/* Construct struct pt_regs on stack */</span><br>pushq  $__USER_DS      <span class="hljs-comment">/* pt_regs-&gt;ss */</span><br>pushq  <span class="hljs-title function_">PER_CPU_VAR</span><span class="hljs-params">(rsp_scratch)</span>  <span class="hljs-comment">/* pt_regs-&gt;sp */</span><br>pushq  %r11             <span class="hljs-comment">/* pt_regs-&gt;flags */</span><br>pushq  $__USER_CS      <span class="hljs-comment">/* pt_regs-&gt;cs */</span><br>pushq  %rcx             <span class="hljs-comment">/* pt_regs-&gt;ip */</span><br>pushq  %rax             <span class="hljs-comment">/* pt_regs-&gt;orig_ax */</span><br>pushq  %rdi             <span class="hljs-comment">/* pt_regs-&gt;di */</span><br>pushq  %rsi             <span class="hljs-comment">/* pt_regs-&gt;si */</span><br>pushq  %rdx             <span class="hljs-comment">/* pt_regs-&gt;dx */</span><br>pushq  %rcx tuichu    <span class="hljs-comment">/* pt_regs-&gt;cx */</span><br>pushq  $-ENOSYS        <span class="hljs-comment">/* pt_regs-&gt;ax */</span><br>pushq  %r8              <span class="hljs-comment">/* pt_regs-&gt;r8 */</span><br>pushq  %r9              <span class="hljs-comment">/* pt_regs-&gt;r9 */</span><br>pushq  %r10             <span class="hljs-comment">/* pt_regs-&gt;r10 */</span><br>pushq  %r11             <span class="hljs-comment">/* pt_regs-&gt;r11 */</span><br>sub $<span class="hljs-params">(<span class="hljs-number">6</span>*<span class="hljs-number">8</span>)</span>, %rsp      <span class="hljs-comment">/* pt_regs-&gt;bp, bx, r12-15 not saved */</span><br><br>.......<br>.......<br></code></pre></td></tr></table></figure>
+
+<p>首先通过 swapgs 切换 GS 段寄存器，将 GS 寄存器值和一个特定位置的值进行交换，目的是保存 GS 值，同时将该位置的值作为内核执行时的 GS 值使用。</p>
+<p>然后将当前栈顶（用户空间栈顶）记录在 CPU 独占变量区域里，将 CPU 独占区域里记录的内核栈顶放入 rsp&#x2F;esp。</p>
+<p>最后通过 push 保存各寄存器值……</p>
+<p>syscall里面的细节我们不探究，直接看从syscall返回那部分</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs x86asm">LOCKDEP_SYS_EXIT   // 宏的实现与 CONFIG_DEBUG_LOCK_ALLOC 内核配置选项相关，该配置允许在退出系统调用时调试锁。<br>    TRACE_IRQS_ON       /* user mode is traced as IRQs on */<br>    <span class="hljs-keyword">movq</span>    <span class="hljs-built_in">RIP</span>(%rsp), %rcx<br>    <span class="hljs-keyword">movq</span>    EFLAGS(%rsp), %r11<br><br>    RESTORE_C_REGS_EXCEPT_RCX_R11<br>    // 恢复除 rxc 和 <span class="hljs-built_in">r11</span> 外所有通用寄存器, 因为 <span class="hljs-built_in">rcx</span> 寄存器为调用系统调用的应用程序的返回地址， <span class="hljs-built_in">r11</span> 寄存器为老的 flags register<br><br>    /* 根据压栈的内容，恢复 <span class="hljs-built_in">rsp</span> 为用户态的栈顶 */<br>    <span class="hljs-keyword">movq</span>    <span class="hljs-built_in">RSP</span>(%rsp), %rsp<br><br>    USERGS_SYSRET64<br>   /* 调用宏 USERGS_SYSRET64 ，其扩展调用 <span class="hljs-keyword">swapgs</span> 指令交换用户 <span class="hljs-built_in">GS</span> 和内核<span class="hljs-built_in">GS</span>， <span class="hljs-keyword">sysret</span> 指令执行从系统调用处理退出 */<br></code></pre></td></tr></table></figure>
+
+<p>关注一下sysret指令，它是syscall从内核态返回用户态的伴随指令。执行sysret时，它从rcx加载rip，并从r11加载rflags，从 MSR的 IA32_STAR[63:48] 加载CS ，从 IA32_STAR[63:48] + 8 加载SS。SYSRET指令不会修改堆栈指针（ESP或RSP），因此在执行SYSRET之前rsp必须切换到用户堆栈，当然还要切换GS寄存器。</p>
+<p>总结一下: 在提权时，当我们使用sysret指令从内核态中返回前，我们需要先设置rcx为用户态rip，设置r11为用户态rflags，设置rsp为一个用户态堆栈，并执行swapgs交换GS寄存器。</p>
+<h2 id="0x01-About-KPTI"><a href="#0x01-About-KPTI" class="headerlink" title="0x01 About KPTI"></a>0x01 About KPTI</h2><blockquote>
+<p>在这之前你需要了解内存分页机制喵~</p>
+</blockquote>
+<h3 id="一切的开始"><a href="#一切的开始" class="headerlink" title="一切的开始"></a>一切的开始</h3><p>每个进程都有一套指向进程自身的页表，由CR3寄存器指向。</p>
+<p>早期的Linux内核，每当执行用户空间代码（应用程序）时，Linux会在其分页表中保留整个内核内存的映射(内核地址空间和用户地址空间共用一个页全局目录表PGD)，并保护其访问。这样做的优点是当应用程序向内核发送系统调用或收到中断时，内核页表始终存在，可以避免绝大多数上下文交换相关的开销（TLB刷新、页表交换等）。</p>
+<p>尽管阻止了对这些内核映射的访问，但在之后的一段时间，英特尔x86处理器还是被爆出了可用于页表泄露的旁路攻击，可能绕过KASLR.</p>
+<h3 id="KPTI"><a href="#KPTI" class="headerlink" title="KPTI"></a>KPTI</h3><p>KPTI(Kernel PageTable Isolation)全称内核页表隔离,它通过完全分离用户空间与内核空间页表来解决页表泄露。</p>
+<p>KPTI中每个进程有两套页表——内核态页表与用户态页表(两个地址空间)。内核态页表只能在内核态下访问，可以创建到内核和用户的映射（不过用户空间受SMAP和SMEP保护）。用户态页表只包含用户空间。不过由于涉及到上下文切换，所以在用户态页表中必须包含部分内核地址，用来建立到中断入口和出口的映射。</p>
+<p>当中断在用户态发生时，就涉及到切换CR3寄存器，从用户态地址空间切换到内核态的地址空间。中断上半部的要求是尽可能的快，从而切换CR3这个操作也要求尽可能的快。为了达到这个目的，KPTI中将内核空间的PGD和用户空间的PGD连续的放置在一个8KB的内存空间中（内核态在低位，用户态在高位）。这段空间必须是8K对齐的，这样将CR3的切换操作转换为将CR3值的第13位(由低到高)的置位或清零操作，提高了CR3切换的速度。</p>
+<p><img src="/images/kpti-bypass/1.png" srcset="/img/loading.gif" lazyload></p>
+<p>需要进行说明的是，在这两张页表上都有着对用户内存空间的完整映射，但在用户页表中只映射了少量的内核代码（例如系统调用入口点、中断处理等），而只有在内核页表中才有着对内核内存空间的完整映射，但两张页表都有着对用户内存空间的完整映射，如下图所示，左侧是未开启 KPTI 后的页表布局，右侧是开启了 KPTI 后的页表布局。<br><img src="/images/kpti-bypass/kpti.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>KPTI 同时还令内核页表中用户地址空间部分对应的页顶级表项不再拥有执行权限（NX），这使得 ret2usr 彻底成为过去式 。</p>
+<h3 id="swap-CR3"><a href="#swap-CR3" class="headerlink" title="swap CR3"></a>swap CR3</h3></blockquote>
+<p>下面我们来看一个开启KPTI内核的entry_SYSCALL_64函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><code class="hljs c">ENTRY(entry_SYSCALL_64)<br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * Interrupts are off on entry.</span><br><span class="hljs-comment">     * We do not frame this tiny irq-off block with TRACE_IRQS_OFF/ON,</span><br><span class="hljs-comment">     * it is too small to ever cause noticeable irq latency.</span><br><span class="hljs-comment">     */</span><br>    SWAPGS_UNSAFE_STACK<br>    <span class="hljs-comment">// KPTI 进内核态需要切到内核页表</span><br>    SWITCH_KERNEL_CR3_NO_STACK<br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * A hypervisor implementation might want to use a label</span><br><span class="hljs-comment">     * after the swapgs, so that it can do the swapgs</span><br><span class="hljs-comment">     * for the guest and jump here on syscall.</span><br><span class="hljs-comment">     */</span><br>GLOBAL(entry_SYSCALL_64_after_swapgs)<br>    <span class="hljs-comment">// 将用户栈偏移保存到 per-cpu 变量 rsp_scratch 中</span><br>    movq    %rsp, PER_CPU_VAR(rsp_scratch)<br>    <span class="hljs-comment">// 加载内核栈偏移</span><br>    movq    <span class="hljs-title function_">PER_CPU_VAR</span><span class="hljs-params">(cpu_current_top_of_stack)</span>, %rsp<br><br>    TRACE_IRQS_OFF<br><br>    <span class="hljs-comment">/* Construct struct pt_regs on stack */</span><br>    pushq   $__USER_DS          <span class="hljs-comment">/* pt_regs-&gt;ss */</span><br>    pushq   <span class="hljs-title function_">PER_CPU_VAR</span><span class="hljs-params">(rsp_scratch)</span>    <span class="hljs-comment">/* pt_regs-&gt;sp */</span><br>    pushq   %r11                <span class="hljs-comment">/* pt_regs-&gt;flags */</span><br>    pushq   $__USER_CS          <span class="hljs-comment">/* pt_regs-&gt;cs */</span><br>    pushq   %rcx                <span class="hljs-comment">/* pt_regs-&gt;ip */</span><br>    pushq   %rax                <span class="hljs-comment">/* pt_regs-&gt;orig_ax */</span><br>    pushq   %rdi                <span class="hljs-comment">/* pt_regs-&gt;di */</span><br>    pushq   %rsi                <span class="hljs-comment">/* pt_regs-&gt;si */</span><br>    pushq   %rdx                <span class="hljs-comment">/* pt_regs-&gt;dx */</span><br>    pushq   %rcx                <span class="hljs-comment">/* pt_regs-&gt;cx */</span><br>    pushq   $-ENOSYS            <span class="hljs-comment">/* pt_regs-&gt;ax */</span><br>    pushq   %r8             <span class="hljs-comment">/* pt_regs-&gt;r8 */</span><br>    pushq   %r9             <span class="hljs-comment">/* pt_regs-&gt;r9 */</span><br>    pushq   %r10                <span class="hljs-comment">/* pt_regs-&gt;r10 */</span><br>    pushq   %r11                <span class="hljs-comment">/* pt_regs-&gt;r11 */</span><br>    <span class="hljs-comment">// 为r12-r15, rbp, rbx保留位置</span><br>    sub $<span class="hljs-params">(<span class="hljs-number">6</span>*<span class="hljs-number">8</span>)</span>, %rsp            <span class="hljs-comment">/* pt_regs-&gt;bp, bx, r12-15 not saved */</span><br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * If we need to do entry work or if we guess we&#x27;ll need to do</span><br><span class="hljs-comment">     * exit work, go straight to the slow path.</span><br><span class="hljs-comment">     */</span><br>    movq    <span class="hljs-title function_">PER_CPU_VAR</span><span class="hljs-params">(current_task)</span>, %r11<br>    testl   $_TIF_WORK_SYSCALL_ENTRY|_TIF_ALLWORK_MASK, <span class="hljs-title function_">TASK_TI_flags</span><span class="hljs-params">(%r11)</span><br>    jnz entry_SYSCALL64_slow_path<br><br>entry_SYSCALL_64_fastpath:<br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * Easy case: enable interrupts and issue the syscall.  If the syscall</span><br><span class="hljs-comment">     * needs pt_regs, we&#x27;ll call a stub that disables interrupts again</span><br><span class="hljs-comment">     * and jumps to the slow path.</span><br><span class="hljs-comment">     */</span><br>    TRACE_IRQS_ON<br>    <span class="hljs-title function_">ENABLE_INTERRUPTS</span><span class="hljs-params">(CLBR_NONE)</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span> __SYSCALL_MASK == ~0</span><br>    <span class="hljs-comment">// 确保系统调用号没超过最大值，超过了则跳转到后面的符号 1 处进行返回</span><br>    cmpq    $__NR_syscall_max, %rax<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>    andl    $__SYSCALL_MASK, %eax<br>    cmpl    $__NR_syscall_max, %eax<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>    ja  1f              <span class="hljs-comment">/* return -ENOSYS (already in pt_regs-&gt;ax) */</span><br>    <span class="hljs-comment">// 除系统调用外的其他调用都通过 rcx 来传第四个参数，因此将 r10 的内容设置到 rcx</span><br>    movq    %r10, %rcx<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * This call instruction is handled specially in stub_ptregs_64.</span><br><span class="hljs-comment">     * It might end up jumping to the slow path.  If it jumps, RAX</span><br><span class="hljs-comment">     * and all argument registers are clobbered.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-comment">// 调用系统调用表中对应的函数</span><br>    call    *<span class="hljs-title function_">sys_call_table</span><span class="hljs-params">(, %rax, <span class="hljs-number">8</span>)</span><br>.Lentry_SYSCALL_64_after_fastpath_call:<br>    <span class="hljs-comment">// 将函数返回值压到栈中，返回时弹出</span><br>    movq    %rax, <span class="hljs-title function_">RAX</span><span class="hljs-params">(%rsp)</span><br>1:<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * If we get here, then we know that pt_regs is clean for SYSRET64.</span><br><span class="hljs-comment">     * If we see that no exit work is required (which we are required</span><br><span class="hljs-comment">     * to check with IRQs off), then we can go straight to SYSRET64.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-title function_">DISABLE_INTERRUPTS</span><span class="hljs-params">(CLBR_NONE)</span><br>    TRACE_IRQS_OFF<br>    movq    <span class="hljs-title function_">PER_CPU_VAR</span><span class="hljs-params">(current_task)</span>, %r11<br>    testl   $_TIF_ALLWORK_MASK, <span class="hljs-title function_">TASK_TI_flags</span><span class="hljs-params">(%r11)</span><br>    jnz 1f<br><br>    LOCKDEP_SYS_EXIT   <span class="hljs-comment">// 宏的实现与 CONFIG_DEBUG_LOCK_ALLOC 内核配置选项相关，该配置允许在退出系统调用时调试锁。</span><br>    TRACE_IRQS_ON       <span class="hljs-comment">/* user mode is traced as IRQs on */</span><br>    movq    <span class="hljs-title function_">RIP</span><span class="hljs-params">(%rsp)</span>, %rcx<br>    movq    <span class="hljs-title function_">EFLAGS</span><span class="hljs-params">(%rsp)</span>, %r11<br>    RESTORE_C_REGS_EXCEPT_RCX_R11<br>    <span class="hljs-comment">// 恢复除 rxc 和 r11 外所有通用寄存器, 因为 rcx 寄存器为调用系统调用的应用程序的返回地址， r11 寄存器为老的 flags register</span><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * This opens a window where we have a user CR3, but are</span><br><span class="hljs-comment">     * running in the kernel.  This makes using the CS</span><br><span class="hljs-comment">     * register useless for telling whether or not we need to</span><br><span class="hljs-comment">     * switch CR3 in NMIs.  Normal interrupts are OK because</span><br><span class="hljs-comment">     * they are off here.</span><br><span class="hljs-comment">     */</span><br>    SWITCH_USER_CR3    <span class="hljs-comment">// KPTI 返回用户态需要切回用户页表</span><br>    <span class="hljs-comment">/* 根据压栈的内容，恢复 rsp 为用户态的栈顶 */</span><br>    movq    <span class="hljs-title function_">RSP</span><span class="hljs-params">(%rsp)</span>, %rsp<br>    USERGS_SYSRET64<br>   <span class="hljs-comment">/* 调用宏 USERGS_SYSRET64 ，其扩展调用 swapgs 指令交换用户 GS 和内核GS， sysret 指令执行从系统调用处理退出 */</span><br><br>........<br>........<br></code></pre></td></tr></table></figure>
+
+<p>可以看出，在入口和结束的地方都加了SWITCH_CR3相关的宏定义，尝试着分析SWITCH_KERNEL_CR3_NO_STACK，里面汇编实现如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c">mov     rdi, cr3<br>nop<br>nop<br>nop<br>nop<br>nop<br>and     rdi, <span class="hljs-number">0xFFFFFFFFFFFFE7FF</span><br>mov     cr3, rdi<br></code></pre></td></tr></table></figure>
+
+<p>拆分FFFFFFFFFFFFE7FF，它的第12和13位是零，这段代码目的就是将CR3的第12位与第13位置零（页表的第12位在CR4寄存器的PCIDE位未开启的情况下，都是保留给OS留做他用），我们只关心13位置零，就相当于CR3-0x1000，从用户态PGD转换成内核态PGD。</p>
+<p>再看SWITCH_USER_CR3宏定义的汇编：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c">mov     rdi, cr3<br>or      rdi, <span class="hljs-number">1000</span>h<br>mov     cr3, rdi<br></code></pre></td></tr></table></figure>
+
+<h2 id="0x02-KPTI-Bypass"><a href="#0x02-KPTI-Bypass" class="headerlink" title="0x02 KPTI Bypass"></a>0x02 KPTI Bypass</h2><p>在开启KPTI内核，提权返回到用户态（iretq&#x2F;sysret）之前如果不设置CR3寄存器的值，就会导致进程找不到当前程序的正确页表，引发段错误，程序退出。</p>
+<p>知道KPTI原理，在kernel提权返回用户态的时候绕过kpti的话就很简单了，利用内核映像中现有的gadget</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs assemble">mov     rdi, cr3<br>or      rdi, 1000h<br>mov     cr3, rdi<br></code></pre></td></tr></table></figure>
+<p>来设置CR3寄存器，并按照iretq&#x2F;sysret 的需求构造内容，再返回就OK了。</p>
+<p>有一种比较懒惰的方法就是利用swapgs_restore_regs_and_return_to_usermode这个函数返回：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cat</span> /proc/kallsyms| grep swapgs_restore_regs_and_return_to_userm<br></code></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c">arch/x86/entry/entry_64.S<br><br><span class="hljs-title function_">SYM_INNER_LABEL</span><span class="hljs-params">(swapgs_restore_regs_and_return_to_usermode, SYM_L_GLOBAL)</span><br><br>    POP_REGS pop_rdi=<span class="hljs-number">0</span><br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * The stack is now user RDI, orig_ax, RIP, CS, EFLAGS, RSP, SS.</span><br><span class="hljs-comment">     * Save old stack pointer and switch to trampoline stack.</span><br><span class="hljs-comment">     */</span><br>    movq    %rsp, %rdi<br>    movq    <span class="hljs-title function_">PER_CPU_VAR</span><span class="hljs-params">(cpu_tss_rw + TSS_sp0)</span>, %rsp<br><br>    <span class="hljs-comment">/* Copy the IRET frame to the trampoline stack. */</span><br>    pushq    6*8<span class="hljs-params">(%rdi)</span>    <span class="hljs-comment">/* SS */</span><br>    pushq    5*8<span class="hljs-params">(%rdi)</span>    <span class="hljs-comment">/* RSP */</span><br>    pushq    4*8<span class="hljs-params">(%rdi)</span>    <span class="hljs-comment">/* EFLAGS */</span><br>    pushq    3*8<span class="hljs-params">(%rdi)</span>    <span class="hljs-comment">/* CS */</span><br>    pushq    2*8<span class="hljs-params">(%rdi)</span>    <span class="hljs-comment">/* RIP */</span><br><br>    <span class="hljs-comment">/* Push user RDI on the trampoline stack. */</span><br>    <span class="hljs-title function_">pushq</span>    <span class="hljs-params">(%rdi)</span><br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * We are on the trampoline stack.  All regs except RDI are live.</span><br><span class="hljs-comment">     * We can do future final exit work right here.</span><br><span class="hljs-comment">     */</span><br>    STACKLEAK_ERASE_NOCLOBBER<br><br>    SWITCH_TO_USER_CR3_STACK scratch_reg=%rdi<br><br>    <span class="hljs-comment">/* Restore RDI. */</span><br>    popq    %rdi<br>    SWAPGS<br>    INTERRUPT_RETURN<br></code></pre></td></tr></table></figure>
+
+<p>汇编如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs assemble">swapgs_restore_regs_and_return_to_usermode<br><br>.text:FFFFFFFF81600A34 41 5F                          pop     r15<br>.text:FFFFFFFF81600A36 41 5E                          pop     r14<br>.text:FFFFFFFF81600A38 41 5D                          pop     r13<br>.text:FFFFFFFF81600A3A 41 5C                          pop     r12<br>.text:FFFFFFFF81600A3C 5D                             pop     rbp<br>.text:FFFFFFFF81600A3D 5B                             pop     rbx<br>.text:FFFFFFFF81600A3E 41 5B                          pop     r11<br>.text:FFFFFFFF81600A40 41 5A                          pop     r10<br>.text:FFFFFFFF81600A42 41 59                          pop     r9<br>.text:FFFFFFFF81600A44 41 58                          pop     r8<br>.text:FFFFFFFF81600A46 58                             pop     rax<br>.text:FFFFFFFF81600A47 59                             pop     rcx<br>.text:FFFFFFFF81600A48 5A                             pop     rdx<br>.text:FFFFFFFF81600A49 5E                             pop     rsi<br>.text:FFFFFFFF81600A4A 48 89 E7                       mov     rdi, rsp    &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br>.text:FFFFFFFF81600A4D 65 48 8B 24 25+                mov     rsp, gs: 0x5004<br>.text:FFFFFFFF81600A56 FF 77 30                       push    qword ptr [rdi+30h]<br>.text:FFFFFFFF81600A59 FF 77 28                       push    qword ptr [rdi+28h]<br>.text:FFFFFFFF81600A5C FF 77 20                       push    qword ptr [rdi+20h]<br>.text:FFFFFFFF81600A5F FF 77 18                       push    qword ptr [rdi+18h]<br>.text:FFFFFFFF81600A62 FF 77 10                       push    qword ptr [rdi+10h]<br>.text:FFFFFFFF81600A65 FF 37                          push    qword ptr [rdi]<br>.text:FFFFFFFF81600A67 50                             push    rax<br>.text:FFFFFFFF81600A68 EB 43                          nop<br>.text:FFFFFFFF81600A6A 0F 20 DF                       mov     rdi, cr3<br>.text:FFFFFFFF81600A6D EB 34                          jmp     0xFFFFFFFF81600AA3<br><br>.text:FFFFFFFF81600AA3 48 81 CF 00 10+                or      rdi, 1000h<br>.text:FFFFFFFF81600AAA 0F 22 DF                       mov     cr3, rdi<br>.text:FFFFFFFF81600AAD 58                             pop     rax<br>.text:FFFFFFFF81600AAE 5F                             pop     rdi<br>.text:FFFFFFFF81600AAF FF 15 23 65 62+                call    cs: SWAPGS<br>.text:FFFFFFFF81600AB5 FF 25 15 65 62+                jmp     cs: INTERRUPT_RETURN<br><br>_SWAPGS<br>.text:FFFFFFFF8103EFC0 55                             push    rbp<br>.text:FFFFFFFF8103EFC1 48 89 E5                       mov     rbp, rsp<br>.text:FFFFFFFF8103EFC4 0F 01 F8                       swapgs<br>.text:FFFFFFFF8103EFC7 5D                             pop     rbp<br>.text:FFFFFFFF8103EFC8 C3                             retn<br><br><br>_INTERRUPT_RETURN<br>.text:FFFFFFFF81600AE0 F6 44 24 20 04                 test    byte ptr [rsp+0x20], 4<br>.text:FFFFFFFF81600AE5 75 02                          jnz     native_irq_return_ldt<br>.text:FFFFFFFF81600AE7 48 CF                          iretq<br></code></pre></td></tr></table></figure>
+
+<p>在实际操作时前面的一些栈操作都可以跳过，直接从 mov rdi, rsp 开始，这个函数大概可以总结为如下操作：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs assemble">mov  rdi, cr3<br>or rdi, 0x1000<br>mov  cr3, rdi<br>pop rax<br>pop rdi<br>swapgs<br>iretq<br></code></pre></td></tr></table></figure>
+<p>因此我们只需要布置出如下栈布局即可：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs text">rsp  ----&gt;  mov_rdi_rsp<br>            0<br>            0<br>            rip<br>            cs<br>            rflags<br>            rsp<br>            ss<br></code></pre></td></tr></table></figure>
+
+
+<h2 id="例题：强网杯-2018-core"><a href="#例题：强网杯-2018-core" class="headerlink" title="例题：强网杯 2018 - core"></a>例题：强网杯 2018 - core</h2><blockquote>
+<p>老演员了<br>施工ing</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Pwn/" class="print-no-link">#Pwn</a>
+      
+        <a href="/tags/CTF/" class="print-no-link">#CTF</a>
+      
+        <a href="/tags/Kernel-ROP/" class="print-no-link">#Kernel ROP</a>
+      
+        <a href="/tags/Kernel-Pwn/" class="print-no-link">#Kernel Pwn</a>
+      
+        <a href="/tags/KPTI-bypass/" class="print-no-link">#KPTI bypass</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【PWN.0x0E】Linux Kernel Pwn：Kernel ROP with KPTI bypass</div>
+      <div>https://zer0ptr.github.io/2026/05/05/kpti-bypass/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>花時雨</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年5月5日</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>更新于</div>
+          <div>2026年5月5日</div>
+        </div>
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/05/02/kernel-exploit-easy/" title="【PWN.0x0D】Linux Kernel Pwn：Let&#39;s Learn How to Pwn the Kernel">
+                        <span class="hidden-mobile">【PWN.0x0D】Linux Kernel Pwn：Let&#39;s Learn How to Pwn the Kernel</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+    <div id="giscus" class="giscus"></div>
+    <script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"zer0ptr/zer0ptr.github.io","repo-id":"R_kgDOQ7_WQA","category":"Q&A","category-id":"DIC_kwDOQ7_WQM4C1Wz3","theme-light":"light","theme-dark":"dark","mapping":"pathname","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+    <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <br> <a href="https://icp.gov.moe/?keyword=20260320" target="_blank" rel="noopener nofollow">萌ICP备20260320号</a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/openkounter.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/love.js"></script>
+<script src="/js/sakura.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

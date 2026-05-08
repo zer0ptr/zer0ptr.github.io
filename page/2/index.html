@@ -446,6 +446,77 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2026/02/11/heap-ptmalloc2-unlink/" target="_self">
+          <img src="/images/heap-ptmalloc2-unlink/unlinkc.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x06】Linux Heap PWN：Unlink">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/02/11/heap-ptmalloc2-unlink/" target="_self">
+          【PWN.0x06】Linux Heap PWN：Unlink
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2026/02/11/heap-ptmalloc2-unlink/" target="_self">
+        <div>
+          Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-02-11 12:28" pubdate>
+              2026-02-11
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Heap/" class="category-chain-item">Heap</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
+            
+              <a href="/tags/%E5%A0%86/">#堆</a>
+            
+              <a href="/tags/unlink/">#unlink</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
         <a href="/2026/02/09/chunk-extend-overlapping/" target="_self">
           <img src="/images/chunk_extend_overlapping/8.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x05】Linux Heap PWN：Chunk Extend and Overlapping">
         </a>
@@ -655,6 +726,75 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+          <img src="/images/hijack-retaddr/1.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x01】Linux PWN：Hijack retaddr">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+          【PWN.0x01】Linux PWN：Hijack retaddr
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+        <div>
+          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-01-24 00:00" pubdate>
+              2026-01-24
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
         <a href="/2026/01/24/RefleXGenThe_unexamined_code_is_not_worth_using/" target="_self">
           <img src="/images/banner/reflexgen.png" srcset="/img/loading.gif" lazyload alt="【论文笔记】RefleXGen：The unexamined code is not worth using">
         </a>
@@ -728,75 +868,6 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
-          <img src="/images/hijack-retaddr/1.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x01】Linux PWN：Hijack retaddr">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
-          【PWN.0x01】Linux PWN：Hijack retaddr
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt " href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
-        <div>
-          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-01-24 00:00" pubdate>
-              2026-01-24
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Pwn/">#Pwn</a>
-            
-              <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
         <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
           <img src="/images/banner/hijackgot.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x02】Linux PWN：Hijack Got">
         </a>
@@ -852,9 +923,78 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
+              <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
+            
               <a href="/tags/Pwn/">#Pwn</a>
             
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2026/01/23/fmtstr-exploit-x64/" target="_self">
+          <img src="/images/banner/fmtstr.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x00】Linux PWN：fmtstr exploit in x64">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/01/23/fmtstr-exploit-x64/" target="_self">
+          【PWN.0x00】Linux PWN：fmtstr exploit in x64
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2026/01/23/fmtstr-exploit-x64/" target="_self">
+        <div>
+          原理 其实 64 位的偏移计算和 32 位类似，都是算对应的参数。只不过 64 位函数的前 6 个参数是存储在相应的寄存器中的。但是在利用格式化字符串时，虽然我们并没有向相应寄存器中放入数据，但是程序依旧会按照格式化字符串的相应格式对其进行解析。  例子2017 UIUCTF pwn200 GoodluckChecksec:123456789101112131415# zer0ptr @ DESK
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-01-23 00:00" pubdate>
+              2026-01-23
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
               <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
             
           </div>
         
@@ -935,119 +1075,11 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2026/01/23/fmtstr-exploit-x64/" target="_self">
-          <img src="/images/banner/fmtstr.png" srcset="/img/loading.gif" lazyload alt="【PWN.0x00】Linux PWN：fmtstr exploit in x64">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2026/01/23/fmtstr-exploit-x64/" target="_self">
-          【PWN.0x00】Linux PWN：fmtstr exploit in x64
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt " href="/2026/01/23/fmtstr-exploit-x64/" target="_self">
-        <div>
-          原理 其实 64 位的偏移计算和 32 位类似，都是算对应的参数。只不过 64 位函数的前 6 个参数是存储在相应的寄存器中的。但是在利用格式化字符串时，虽然我们并没有向相应寄存器中放入数据，但是程序依旧会按照格式化字符串的相应格式对其进行解析。  例子2017 UIUCTF pwn200 GoodluckChecksec:123456789101112131415# zer0ptr @ DESK
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-01-23 00:00" pubdate>
-              2026-01-23
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Pwn/">#Pwn</a>
-            
-              <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2025/02/14/hello-world/" target="_self">
-          <img src="/images/banner/default.png" srcset="/img/loading.gif" lazyload alt="Hello World">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2025/02/14/hello-world/" target="_self">
-          Hello World
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt " href="/2025/02/14/hello-world/" target="_self">
-        <div>
-          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2025-02-14 15:13" pubdate>
-              2025-02-14
-            </time>
-          </div>
-        
-        
-        
-      </div>
-    </article>
-  </div>
-
 
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+      <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/#board">3</a><a class="extend next" rel="next" href="/page/3/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 

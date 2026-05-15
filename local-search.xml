@@ -55,9 +55,9 @@
       
       <tag>Kernel ROP</tag>
       
-      <tag>KPTI bypass</tag>
-      
       <tag>Kernel Pwn</tag>
+      
+      <tag>KPTI bypass</tag>
       
     </tags>
     
@@ -88,9 +88,9 @@
       
       <tag>Kernel ROP</tag>
       
-      <tag>Kernel Pwn</tag>
-      
       <tag>强网杯</tag>
+      
+      <tag>Kernel Pwn</tag>
       
     </tags>
     

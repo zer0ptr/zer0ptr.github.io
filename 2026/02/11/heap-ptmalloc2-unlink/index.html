@@ -21,14 +21,15 @@
   
     <meta name="description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【PWN.0x06】Linux Heap PWN：Unlink">
+<meta property="og:title" content="Unlink Attack">
 <meta property="og:url" content="https://zer0ptr.github.io/2026/02/11/heap-ptmalloc2-unlink/index.html">
 <meta property="og:site_name" content="zer0ptr&#39;s blog">
 <meta property="og:description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zer0ptr.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/hitcontraining-unlink/1.png">
 <meta property="article:published_time" content="2026-02-11T04:28:00.000Z">
-<meta property="article:modified_time" content="2026-05-01T16:21:56.632Z">
+<meta property="article:modified_time" content="2026-05-29T16:23:27.209Z">
 <meta property="article:author" content="zer0ptr">
 <meta property="article:tag" content="Pwn">
 <meta property="article:tag" content="堆">
@@ -40,7 +41,7 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>【PWN.0x06】Linux Heap PWN：Unlink - zer0ptr&#39;s blog</title>
+  <title>Unlink Attack - zer0ptr&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -422,7 +423,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="【PWN.0x06】Linux Heap PWN：Unlink"></span>
+            <span id="subtitle" data-typed-text="Unlink Attack"></span>
           
         </div>
 
@@ -495,7 +496,7 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">【PWN.0x06】Linux Heap PWN：Unlink</h1>
+            <h1 id="seo-header">Unlink Attack</h1>
             
             
               <div class="markdown-body">
@@ -712,7 +713,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>【PWN.0x06】Linux Heap PWN：Unlink</div>
+      <div>Unlink Attack</div>
       <div>https://zer0ptr.github.io/2026/02/11/heap-ptmalloc2-unlink/</div>
     </div>
     <div class="license-meta">
@@ -731,7 +732,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>更新于</div>
-          <div>2026年5月2日</div>
+          <div>2026年5月30日</div>
         </div>
       
       
@@ -762,9 +763,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/02/20/use-after-free-learning/" title="【PWN.0x06】Linux Heap PWN：Use After Free">
+                      <a href="/2026/02/20/use-after-free-learning/" title="Use After Free">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">【PWN.0x06】Linux Heap PWN：Use After Free</span>
+                        <span class="hidden-mobile">Use After Free</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -772,8 +773,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/02/09/chunk-extend-overlapping/" title="【PWN.0x05】Linux Heap PWN：Chunk Extend and Overlapping">
-                        <span class="hidden-mobile">【PWN.0x05】Linux Heap PWN：Chunk Extend and Overlapping</span>
+                      <a href="/2026/02/09/chunk-extend-overlapping/" title="Chunk Extend and Overlapping">
+                        <span class="hidden-mobile">Chunk Extend and Overlapping</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
@@ -874,6 +875,12 @@
 
 
   
+
+
+  
+  
+
+
 
 
 
@@ -1156,6 +1163,49 @@
 
 
   <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
 
   <script defer src="/js/openkounter.js" ></script>
 

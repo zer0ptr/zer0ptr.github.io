@@ -26,12 +26,10 @@
 <meta property="og:site_name" content="zer0ptr&#39;s blog">
 <meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zer0ptr.github.io/images/banner/default.png">
 <meta property="article:published_time" content="2025-02-14T07:13:50.000Z">
-<meta property="article:modified_time" content="2026-05-01T16:32:07.700Z">
+<meta property="article:modified_time" content="2026-05-29T16:23:33.812Z">
 <meta property="article:author" content="zer0ptr">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://zer0ptr.github.io/images/banner/default.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
@@ -546,7 +544,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>更新于</div>
-          <div>2026年5月2日</div>
+          <div>2026年5月30日</div>
         </div>
       
       
@@ -577,9 +575,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/01/23/fmtstr-exploit-x64/" title="【PWN.0x00】Linux PWN：fmtstr exploit in x64">
+                      <a href="/2026/01/23/fmtstr-exploit-x64/" title="fmtstr exploit in x64">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">【PWN.0x00】Linux PWN：fmtstr exploit in x64</span>
+                        <span class="hidden-mobile">fmtstr exploit in x64</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -683,6 +681,12 @@
 
 
   
+
+
+  
+  
+
+
 
 
 
@@ -965,6 +969,49 @@
 
 
   <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
 
   <script defer src="/js/openkounter.js" ></script>
 

@@ -16,31 +16,31 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="Hailin Zheng">
+  <meta name="author" content="zer0ptr">
   <meta name="keywords" content="">
   
     <meta name="description" content="搭建内核运行环境QEMU 是一款开源的虚拟机软件，支持多种不同架构的模拟（Emulation）以及配合 kvm 完成当前架构的虚拟化（Virtualization）的特性，是当前最火热的开源虚拟机软件。 这一章节主要介绍如何使用 QEMU 来搭建调试分析环境。为了使用 qemu 启动和调试内核，我们需要内核、QEMU、文件系统。 获取QEMU先安装通用神秘小工具： 123456sudo apt i">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux Kernel Pwn：Environment Build - Set up a Kernel Runtime Environment">
-<meta property="og:url" content="https://zheng-hailin.github.io/2026/05/02/kernel-qemu-emulate/index.html">
-<meta property="og:site_name" content="Hailin Zheng&#39;s Blog">
+<meta property="og:url" content="https://zer0ptr.github.io/2026/05/02/kernel-qemu-emulate/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
 <meta property="og:description" content="搭建内核运行环境QEMU 是一款开源的虚拟机软件，支持多种不同架构的模拟（Emulation）以及配合 kvm 完成当前架构的虚拟化（Virtualization）的特性，是当前最火热的开源虚拟机软件。 这一章节主要介绍如何使用 QEMU 来搭建调试分析环境。为了使用 qemu 启动和调试内核，我们需要内核、QEMU、文件系统。 获取QEMU先安装通用神秘小工具： 123456sudo apt i">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/kernel-qemu/1.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/kernel-qemu/2.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/kernel-qemu/3.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/kernel-qemu/1.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/kernel-qemu/2.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/kernel-qemu/3.png">
 <meta property="article:published_time" content="2026-05-02T02:56:57.000Z">
 <meta property="article:modified_time" content="2026-05-29T16:24:20.073Z">
-<meta property="article:author" content="Hailin Zheng">
+<meta property="article:author" content="zer0ptr">
 <meta property="article:tag" content="kernel pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://zheng-hailin.github.io/images/kernel-qemu/1.png">
+<meta name="twitter:image" content="https://zer0ptr.github.io/images/kernel-qemu/1.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Linux Kernel Pwn：Environment Build - Set up a Kernel Runtime Environment - Hailin Zheng&#39;s Blog</title>
+  <title>Linux Kernel Pwn：Environment Build - Set up a Kernel Runtime Environment - 花時雨的流水账</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -82,7 +82,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"zheng-hailin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+    var CONFIG = {"hostname":"zer0ptr.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -137,7 +137,7 @@
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
-      <strong>zer0ptr&#39;s blog</strong>
+      <strong>HAILIN&#39;s Blog</strong>
     </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
@@ -687,13 +687,13 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Linux Kernel Pwn：Environment Build - Set up a Kernel Runtime Environment</div>
-      <div>https://zheng-hailin.github.io/2026/05/02/kernel-qemu-emulate/</div>
+      <div>https://zer0ptr.github.io/2026/05/02/kernel-qemu-emulate/</div>
     </div>
     <div class="license-meta">
       
         <div class="license-meta-item">
           <div>作者</div>
-          <div>Hailin Zheng</div>
+          <div>zer0ptr</div>
         </div>
       
       

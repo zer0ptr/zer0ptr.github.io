@@ -16,34 +16,34 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="Hailin Zheng">
+  <meta name="author" content="zer0ptr">
   <meta name="keywords" content="">
   
     <meta name="description" content="前情：学校之前买了台机器狗，最近Yeuoui提起这个事说有空可以到实验室里来玩玩，但由于是学校的东西笔者又不是正经大学生（苦逼高中生一枚）没有对于机器人方向有深入的了解因此只打算玩玩简单的功能因此也不太敢拆（主要是Yeuoui说怕拆了装不回去（悲）），那我们只能来探讨下怎么在不拆狗的情况下去做些更意义不明有意思的事情。     环境搭建我们的机器狗的型号是Unitree Go2 Pro，我的环境是">
 <meta property="og:type" content="article">
 <meta property="og:title" content="如何在不拆开机器狗的情况下优雅地对其进行二开">
-<meta property="og:url" content="https://zheng-hailin.github.io/2026/05/06/unitree-debug-learning-1/index.html">
-<meta property="og:site_name" content="Hailin Zheng&#39;s Blog">
+<meta property="og:url" content="https://zer0ptr.github.io/2026/05/06/unitree-debug-learning-1/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
 <meta property="og:description" content="前情：学校之前买了台机器狗，最近Yeuoui提起这个事说有空可以到实验室里来玩玩，但由于是学校的东西笔者又不是正经大学生（苦逼高中生一枚）没有对于机器人方向有深入的了解因此只打算玩玩简单的功能因此也不太敢拆（主要是Yeuoui说怕拆了装不回去（悲）），那我们只能来探讨下怎么在不拆狗的情况下去做些更意义不明有意思的事情。     环境搭建我们的机器狗的型号是Unitree Go2 Pro，我的环境是">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unitree_go_1/2.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unitree_go_1/3png.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unitree_go_1/3png.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unitree_go_1/4.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unitree_go_1/2.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unitree_go_1/3png.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unitree_go_1/3png.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unitree_go_1/4.png">
 <meta property="article:published_time" content="2026-05-06T13:34:08.000Z">
 <meta property="article:modified_time" content="2026-05-29T16:25:22.089Z">
-<meta property="article:author" content="Hailin Zheng">
+<meta property="article:author" content="zer0ptr">
 <meta property="article:tag" content="Unitree">
 <meta property="article:tag" content="Unitree Go2">
 <meta property="article:tag" content="宇树机器狗">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://zheng-hailin.github.io/images/unitree_go_1/2.png">
+<meta name="twitter:image" content="https://zer0ptr.github.io/images/unitree_go_1/2.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>如何在不拆开机器狗的情况下优雅地对其进行二开 - Hailin Zheng&#39;s Blog</title>
+  <title>如何在不拆开机器狗的情况下优雅地对其进行二开 - 花時雨的流水账</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -85,7 +85,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"zheng-hailin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+    var CONFIG = {"hostname":"zer0ptr.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -140,7 +140,7 @@
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
-      <strong>zer0ptr&#39;s blog</strong>
+      <strong>HAILIN&#39;s Blog</strong>
     </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
@@ -609,13 +609,13 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>如何在不拆开机器狗的情况下优雅地对其进行二开</div>
-      <div>https://zheng-hailin.github.io/2026/05/06/unitree-debug-learning-1/</div>
+      <div>https://zer0ptr.github.io/2026/05/06/unitree-debug-learning-1/</div>
     </div>
     <div class="license-meta">
       
         <div class="license-meta-item">
           <div>作者</div>
-          <div>Hailin Zheng</div>
+          <div>zer0ptr</div>
         </div>
       
       

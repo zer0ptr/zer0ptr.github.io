@@ -16,25 +16,25 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="Hailin Zheng">
+  <meta name="author" content="zer0ptr">
   <meta name="keywords" content="">
   
     <meta name="description" content="Description Unsorted Bin Attack，顾名思义，该攻击与 Glibc 堆管理中的的 Unsorted Bin 的机制紧密相关。 Unsorted Bin Attack 被利用的前提是控制 Unsorted Bin Chunk 的 bk 指针。 Unsorted Bin Attack 可以达到的效果是实现修改任意地址值为一个较大的数值。  回顾Unsorted Bin的基本">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux Heap PWN：Unsorted Bin Attack">
-<meta property="og:url" content="https://zheng-hailin.github.io/2026/04/06/unsortedbin-attack/index.html">
-<meta property="og:site_name" content="Hailin Zheng&#39;s Blog">
+<meta property="og:url" content="https://zer0ptr.github.io/2026/04/06/unsortedbin-attack/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
 <meta property="og:description" content="Description Unsorted Bin Attack，顾名思义，该攻击与 Glibc 堆管理中的的 Unsorted Bin 的机制紧密相关。 Unsorted Bin Attack 被利用的前提是控制 Unsorted Bin Chunk 的 bk 指针。 Unsorted Bin Attack 可以达到的效果是实现修改任意地址值为一个较大的数值。  回顾Unsorted Bin的基本">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/figure/unsortedbins-struct.jpg">
 <meta property="og:image" content="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/figure/malloc-trim-ida.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unsortedbin-attack/1.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unsortedbin-attack/2.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unsortedbin-attack/3.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/unsortedbin-attack/4.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unsortedbin-attack/1.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unsortedbin-attack/2.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unsortedbin-attack/3.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/unsortedbin-attack/4.png">
 <meta property="article:published_time" content="2026-04-06T02:54:10.000Z">
 <meta property="article:modified_time" content="2026-05-29T16:25:27.719Z">
-<meta property="article:author" content="Hailin Zheng">
+<meta property="article:author" content="zer0ptr">
 <meta property="article:tag" content="Pwn">
 <meta property="article:tag" content="Heap">
 <meta property="article:tag" content="Unsorted Bin Attack">
@@ -45,7 +45,7 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Linux Heap PWN：Unsorted Bin Attack - Hailin Zheng&#39;s Blog</title>
+  <title>Linux Heap PWN：Unsorted Bin Attack - 花時雨的流水账</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -87,7 +87,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"zheng-hailin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+    var CONFIG = {"hostname":"zer0ptr.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -142,7 +142,7 @@
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
-      <strong>zer0ptr&#39;s blog</strong>
+      <strong>HAILIN&#39;s Blog</strong>
     </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
@@ -710,13 +710,13 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Linux Heap PWN：Unsorted Bin Attack</div>
-      <div>https://zheng-hailin.github.io/2026/04/06/unsortedbin-attack/</div>
+      <div>https://zer0ptr.github.io/2026/04/06/unsortedbin-attack/</div>
     </div>
     <div class="license-meta">
       
         <div class="license-meta-item">
           <div>作者</div>
-          <div>Hailin Zheng</div>
+          <div>zer0ptr</div>
         </div>
       
       

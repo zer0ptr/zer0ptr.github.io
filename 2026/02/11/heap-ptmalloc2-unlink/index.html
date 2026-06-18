@@ -16,32 +16,32 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="Hailin Zheng">
+  <meta name="author" content="zer0ptr">
   <meta name="keywords" content="">
   
     <meta name="description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unlink Attack">
-<meta property="og:url" content="https://zheng-hailin.github.io/2026/02/11/heap-ptmalloc2-unlink/index.html">
-<meta property="og:site_name" content="Hailin Zheng&#39;s Blog">
+<meta property="og:url" content="https://zer0ptr.github.io/2026/02/11/heap-ptmalloc2-unlink/index.html">
+<meta property="og:site_name" content="花時雨的流水账">
 <meta property="og:description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
-<meta property="og:image" content="https://zheng-hailin.github.io/images/hitcontraining-unlink/1.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/hitcontraining-unlink/1.png">
 <meta property="article:published_time" content="2026-02-11T04:28:00.000Z">
 <meta property="article:modified_time" content="2026-05-29T16:23:27.209Z">
-<meta property="article:author" content="Hailin Zheng">
+<meta property="article:author" content="zer0ptr">
 <meta property="article:tag" content="Pwn">
 <meta property="article:tag" content="堆">
 <meta property="article:tag" content="unlink">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://zheng-hailin.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
+<meta name="twitter:image" content="https://zer0ptr.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Unlink Attack - Hailin Zheng&#39;s Blog</title>
+  <title>Unlink Attack - 花時雨的流水账</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -83,7 +83,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"zheng-hailin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+    var CONFIG = {"hostname":"zer0ptr.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"https://hm.baidu.com/hm.js?b9b0b3e62acf7317ea950312e92ab427","google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -138,7 +138,7 @@
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
-      <strong>zer0ptr&#39;s blog</strong>
+      <strong>HAILIN&#39;s Blog</strong>
     </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
@@ -714,13 +714,13 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Unlink Attack</div>
-      <div>https://zheng-hailin.github.io/2026/02/11/heap-ptmalloc2-unlink/</div>
+      <div>https://zer0ptr.github.io/2026/02/11/heap-ptmalloc2-unlink/</div>
     </div>
     <div class="license-meta">
       
         <div class="license-meta-item">
           <div>作者</div>
-          <div>Hailin Zheng</div>
+          <div>zer0ptr</div>
         </div>
       
       

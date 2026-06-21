@@ -474,15 +474,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/24/RefleXGenThe_unexamined_code_is_not_worth_using/" target="_self">
-          【论文笔记】RefleXGen：The unexamined code is not worth using
+        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+          Hijack retaddr
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/RefleXGenThe_unexamined_code_is_not_worth_using/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
         <div>
-          基本信息 Title: RefleXGen: The unexamined code is not worth usingAuthors: Bin Wang, Hui Li*, AoFan Liu, et al.Affiliations: School of Electronic and Computer Engineering, Peking University (Shenzhen); Chi
+          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
         </div>
       </a>
 
@@ -506,7 +506,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Paper/" class="category-chain-item">Paper</a>
+  <a href="/categories/fmtstr/" class="category-chain-item">fmtstr</a>
   
   
 
@@ -521,13 +521,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/LLM/">#LLM</a>
+              <a href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/">#格式化字符串漏洞</a>
             
-              <a href="/tags/Code-Generation/">#Code Generation</a>
-            
-              <a href="/tags/LLM%E5%AE%89%E5%85%A8/">#LLM安全</a>
-            
-              <a href="/tags/RAG/">#RAG</a>
+              <a href="/tags/Pwn/">#Pwn</a>
             
           </div>
         
@@ -541,15 +537,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
-          Hijack retaddr
+        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+          Hijack Got
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
         <div>
-          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
+          原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的
         </div>
       </a>
 

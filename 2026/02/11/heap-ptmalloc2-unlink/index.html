@@ -23,7 +23,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unlink Attack">
 <meta property="og:url" content="https://zer0ptr.github.io/2026/02/11/heap-ptmalloc2-unlink/index.html">
-<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:site_name" content="zer0ptr的神秘小屋">
 <meta property="og:description" content="Overview unlink俗称脱链，就是将链表头处的free堆块从unsorted bin中脱离出来，然后和物理地址相邻的新free的堆块合并成大堆块(向前合并或向后合并)，再放入到unsorted bin中。 危害原理：通过伪造free状态的fake_chunk，伪造fd和bk指针，通过绕过unlink的检测实现unlink使其往p所在的位置写入p-0x18，从而实现任意地址写的漏洞。 漏洞">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zer0ptr.github.io/images/heap-ptmalloc2-unlink/unlinkc.png">
@@ -41,7 +41,7 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Unlink Attack - 花時雨的流水账</title>
+  <title>Unlink Attack - zer0ptr的神秘小屋</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 

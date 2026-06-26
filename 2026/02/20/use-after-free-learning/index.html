@@ -23,7 +23,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="Use After Free">
 <meta property="og:url" content="https://zer0ptr.github.io/2026/02/20/use-after-free-learning/index.html">
-<meta property="og:site_name" content="花時雨的流水账">
+<meta property="og:site_name" content="zer0ptr的神秘小屋">
 <meta property="og:description" content="原理Use After Free即其字面所表达的意思，当一个内存块被释放之后再次被使用。但是其实这里有以下几种情况：  内存块被释放后，其对应的指针被设置为 NULL ， 然后再次使用，自然程序会崩溃。 内存块被释放后，其对应的指针没有被设置为 NULL ，然后在它下一次被使用之前，没有代码对这块内存块进行修改，那么程序很有可能可以正常运转。 内存块被释放后，其对应的指针没有被设置为 NULL，但">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zer0ptr.github.io/images/uaf-hitcon-lab10/magic.png">
@@ -42,7 +42,7 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Use After Free - 花時雨的流水账</title>
+  <title>Use After Free - zer0ptr的神秘小屋</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 

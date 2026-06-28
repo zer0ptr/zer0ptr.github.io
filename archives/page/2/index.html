@@ -61,6 +61,7 @@
 
   
 <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
 
 
 
@@ -586,7 +587,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <br> <a href="https://icp.gov.moe/?keyword=20260320" target="_blank" rel="noopener nofollow">萌ICP备20260320号</a> 
+       <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=146606&auto=1&height=66"></iframe> <br> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <br> <a href="https://icp.gov.moe/?keyword=20260320" target="_blank" rel="noopener nofollow">萌ICP备20260320号</a> <br> 
     </div>
   
   
@@ -619,6 +620,79 @@
   
 </div>
 
+<!-- 全局音乐播放器 -->
+<div id="global-player" style="position:fixed; bottom:60px; right:20px; z-index:999;"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2.0.1/dist/Meting.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 避免重复初始化
+  if (window._playerInited) return;
+  window._playerInited = true;
+
+  // 使用 MetingJS 创建播放器
+  var ap = new APlayer({
+    container: document.getElementById('global-player'),
+    fixed: true,
+    mini: true,
+    theme: '#b7daff',
+    loop: 'all',
+    order: 'list',
+    preload: 'auto',
+    volume: 0.7,
+    mutex: true,
+    listmaxheight: '340px',
+    music: [
+      {
+        title: '加载中...',
+        author: '请等待',
+        url: '',
+        pic: '',
+        lrc: ''
+      }
+    ]
+  });
+
+  // 从网易云加载歌单（使用 Meting API）
+  fetch('https://api.i-meto.com/meting/api?server=netease&type=song&id=146606')
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.length > 0) {
+        var musicList = data.map(function(item) {
+          return {
+            title: item.title,
+            author: item.author,
+            url: item.url,
+            pic: item.pic,
+            lrc: item.lrc || ''
+          };
+        });
+        ap.list.add(musicList);
+        ap.list.switch(0); // 切换到第一首
+        ap.play(); // 自动播放
+      }
+    })
+    .catch(function(error) {
+      console.log('歌单加载失败:', error);
+    });
+});
+</script>
+
+
+<script>
+// PJAX完成后恢复播放器状态
+$(document).on('pjax:complete', function() {
+  // 由于播放器在DOM外，不会被销毁，但需要重新绑定事件
+  if (window.aplayers) {
+    window.aplayers.forEach(function(ap) {
+      ap.play();
+    });
+  }
+});
+</script>
   </footer>
 
   <!-- Scripts -->
@@ -678,6 +752,9 @@
   
 <script src="/js/love.js"></script>
 <script src="/js/sakura.js"></script>
+<script src="//cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/metowolf/MetingJS@1.2/dist/Meting.min.js"></script>
+<script src="/js/pjax-player.js"></script>
 
 
 

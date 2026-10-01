@@ -61,7 +61,6 @@
 
   
 <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.7.0/style.min.css">
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
 
 
 
@@ -428,7 +427,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/img/sakura.jpeg') no-repeat center center; background-size: cover;">
+     style="background: url('/img/bg.jpg') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -542,15 +541,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
-          Hijack Got
+        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+          Hijack retaddr
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
         <div>
-          原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的
+          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
         </div>
       </a>
 
@@ -605,15 +604,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
-          Hijack retaddr
+        <a href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
+          Hijack Got
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijack-retaddr/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/24/fmtstr-exploit-hijackgot/" target="_self">
         <div>
-          原理 利用格式化字符串漏洞来劫持程序的返回地址到我们想要执行的地址。  例子 - 三个白帽 - pwnme_k0Checksec12345678# zer0ptr @ DESKTOP-FHEMUHT in ~/CTF-Training/Pwn/fmtstr/hijack_retaddr on git:master x [12:45:55] $ checksec pwnme_k0[*] &#x27;
+          原理在目前的 C 程序中，libc 中的函数都是通过 GOT 表来跳转的。此外，在没有开启 RELRO 保护的前提下，每个 libc 的函数对应的 GOT 表项是可以被修改的。因此，我们可以修改某个 libc 函数的 GOT 表内容为另一个 libc 函数的地址来实现对程序的控制。比如说我们可以修改 printf 的 got 表项内容为 system 函数的地址。从而，程序在执行 printf 的
         </div>
       </a>
 
@@ -911,79 +910,7 @@
   
 </div>
 
-<!-- 全局音乐播放器 -->
-<div id="global-player" style="position:fixed; bottom:60px; right:20px; z-index:999;"></div>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
-<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2.0.1/dist/Meting.min.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // 避免重复初始化
-  if (window._playerInited) return;
-  window._playerInited = true;
-
-  // 使用 MetingJS 创建播放器
-  var ap = new APlayer({
-    container: document.getElementById('global-player'),
-    fixed: true,
-    mini: true,
-    theme: '#b7daff',
-    loop: 'all',
-    order: 'list',
-    preload: 'auto',
-    volume: 0.7,
-    mutex: true,
-    listmaxheight: '340px',
-    music: [
-      {
-        title: '加载中...',
-        author: '请等待',
-        url: '',
-        pic: '',
-        lrc: ''
-      }
-    ]
-  });
-
-  // 从网易云加载歌单（使用 Meting API）
-  fetch('https://api.i-meto.com/meting/api?server=netease&type=playlist&id=18115673218')
-    .then(response => response.json())
-    .then(data => {
-      if (data && data.length > 0) {
-        var musicList = data.map(function(item) {
-          return {
-            title: item.title,
-            author: item.author,
-            url: item.url,
-            pic: item.pic,
-            lrc: item.lrc || ''
-          };
-        });
-        ap.list.add(musicList);
-        ap.list.switch(0); // 切换到第一首
-        ap.play(); // 自动播放
-      }
-    })
-    .catch(function(error) {
-      console.log('歌单加载失败:', error);
-    });
-});
-</script>
-
-
-<script>
-// PJAX完成后恢复播放器状态
-$(document).on('pjax:complete', function() {
-  // 由于播放器在DOM外，不会被销毁，但需要重新绑定事件
-  if (window.aplayers) {
-    window.aplayers.forEach(function(ap) {
-      ap.play();
-    });
-  }
-});
-</script>
   </footer>
 
   <!-- Scripts -->
@@ -1043,9 +970,6 @@ $(document).on('pjax:complete', function() {
   
 <script src="/js/love.js"></script>
 <script src="/js/sakura.js"></script>
-<script src="//cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/metowolf/MetingJS@1.2/dist/Meting.min.js"></script>
-<script src="/js/pjax-player.js"></script>
 
 
 

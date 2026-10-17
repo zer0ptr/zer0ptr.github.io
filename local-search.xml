@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>你究竟是想我幸福，還是活成你驕傲的樣子</title>
+    <link href="/2026/10/17/what-kind-of-people/"/>
+    <url>/2026/10/17/what-kind-of-people/</url>
+    
+    <content type="html"><![CDATA[<p>你究竟是想我幸福，還是活成你驕傲的樣子</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>琐记</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>琐记</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>TP-Link SR20命令执行漏洞复现</title>
     <link href="/2026/08/04/iot-tp-link-sr20-rce/"/>
     <url>/2026/08/04/iot-tp-link-sr20-rce/</url>
@@ -339,9 +364,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>Large Bin Attack</tag>
       
@@ -368,9 +393,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>Unsorted Bin Attack</tag>
       
@@ -397,9 +422,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>Fastbin</tag>
       
@@ -426,9 +451,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>Heap</tag>
+      
+      <tag>Pwn</tag>
       
       <tag>UAF</tag>
       
@@ -484,9 +509,9 @@
     
     <tags>
       
-      <tag>Heap</tag>
-      
       <tag>堆溢出</tag>
+      
+      <tag>Heap</tag>
       
       <tag>Chunk Extend and Overlapping</tag>
       
@@ -623,9 +648,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>格式化字符串漏洞</tag>
+      
+      <tag>Pwn</tag>
       
     </tags>
     
@@ -650,9 +675,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>格式化字符串漏洞</tag>
+      
+      <tag>Pwn</tag>
       
     </tags>
     
@@ -708,9 +733,9 @@
     
     <tags>
       
-      <tag>Pwn</tag>
-      
       <tag>格式化字符串漏洞</tag>
+      
+      <tag>Pwn</tag>
       
     </tags>
     

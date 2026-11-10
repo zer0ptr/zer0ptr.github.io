@@ -19,17 +19,19 @@
   <meta name="author" content="zer0ptr">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Title: Patch-to-PoC: A Systematic Study of Agentic LLM Systems for Linux KernelN-Day ReproductionAuthors: Juefei Pu, Xingyu Li, Zhengchuan Liang, Jonathan Cox, Yifan Wu, Kareem Shehada, Arrdya Srivas">
+    <meta name="description" content="Title: Patch-to-PoC: A Systematic Study of Agentic LLM Systems for Linux Kernel N-Day ReproductionAuthors: Juefei Pu, Xingyu Li, Zhengchuan Liang, Jonathan Cox, Yifan Wu, Kareem Shehada, Arrdya Sriva">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[论文笔记]Patch-to-PoC: A Systematic Study of Agentic LLM Systems for Linux Kernel N-Day Reproduction">
 <meta property="og:url" content="https://zer0ptr.github.io/2026/11/09/paper-k-repro-note/index.html">
 <meta property="og:site_name" content="zer0ptr的神秘小屋">
-<meta property="og:description" content="Title: Patch-to-PoC: A Systematic Study of Agentic LLM Systems for Linux KernelN-Day ReproductionAuthors: Juefei Pu, Xingyu Li, Zhengchuan Liang, Jonathan Cox, Yifan Wu, Kareem Shehada, Arrdya Srivas">
+<meta property="og:description" content="Title: Patch-to-PoC: A Systematic Study of Agentic LLM Systems for Linux Kernel N-Day ReproductionAuthors: Juefei Pu, Xingyu Li, Zhengchuan Liang, Jonathan Cox, Yifan Wu, Kareem Shehada, Arrdya Sriva">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zer0ptr.github.io/images/k-repro/1.png">
 <meta property="og:image" content="https://zer0ptr.github.io/images/k-repro/2.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/k-repro/3.png">
+<meta property="og:image" content="https://zer0ptr.github.io/images/k-repro/4.png">
 <meta property="article:published_time" content="2026-11-09T09:28:00.000Z">
-<meta property="article:modified_time" content="2026-11-09T10:01:16.472Z">
+<meta property="article:modified_time" content="2026-11-10T09:50:24.900Z">
 <meta property="article:author" content="zer0ptr">
 <meta property="article:tag" content="Linux Kernel">
 <meta property="article:tag" content="N-Day Reproduction">
@@ -473,7 +475,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          3k 字
+          7.4k 字
         
       </span>
     
@@ -484,7 +486,7 @@
         
         
         
-          25 分钟
+          62 分钟
         
       </span>
     
@@ -529,11 +531,11 @@
               <div class="markdown-body">
                 
                 <blockquote>
-<p>Title: Patch-to-PoC: A Systematic Study of Agentic LLM Systems for Linux Kernel<br>N-Day Reproduction<br>Authors: Juefei Pu, Xingyu Li, Zhengchuan Liang, Jonathan Cox, Yifan Wu, Kareem Shehada, Arrdya Srivastav, Zhiyun Qian<br>Affiliations: University of California, Riverside</p>
+<p>Title: Patch-to-PoC: A Systematic Study of Agentic LLM Systems for Linux Kernel N-Day Reproduction<br>Authors: Juefei Pu, Xingyu Li, Zhengchuan Liang, Jonathan Cox, Yifan Wu, Kareem Shehada, Arrdya Srivastav, Zhiyun Qian<br>Affiliations: University of California, Riverside<br>arXiv: 2602.07287 (v2, 2026-02-18)</p>
 </blockquote>
-<h2 id="Challenges-and-Motivation"><a href="#Challenges-and-Motivation" class="headerlink" title="Challenges and Motivation"></a>Challenges and Motivation</h2><p>N-Day 漏洞的“窗口期”来自内核生态的<strong>补丁传播延迟</strong>。上游主线修复后，补丁需要逐级向下游 <code>stable/LTS</code> 分支和发行版内核移植，这一过程往往耗时数十天，部分补丁甚至因遗漏而滞留超过半年。在此背景下，攻击者可以在补丁已公开但下游尚未修复的间隙分析漏洞、开发利用。因此自动化 PoC 生成因此具有双重意义：一是攻击方降低利用门槛，同时还促使防守方加速漏洞分诊与补丁优先级判断。</p>
-<p>但内核 PoC 生成远比用户态困难：内核极其庞大、接口异构（ioctl、netlink 等格式差异巨大）、高度有状态且多线程，多数漏洞需要多个系统调用甚至竞态条件才能触发，因此该工作研究的出发点为检验当前 LLM 智能体是否已经跨过这个门槛。</p>
-<h2 id="K-Repro-系统设计"><a href="#K-Repro-系统设计" class="headerlink" title="K-Repro 系统设计"></a>K-Repro 系统设计</h2><p>本文构建了 K-Repro —— 一个以安全补丁 commit ID 为唯一外部输入的端到端智能体系统，其工作流程为给定补丁 commit 后让系统提取补丁内容，接着用确定性、非 LLM 流水线准备复现环境（补丁前一个 commit 的内核源码与可运行镜像）然后使用LLM 智能体在工具集辅助下迭代分析、构造 PoC、验证崩溃，最后输出 PoC、分析报告与日志。</p>
+<h2 id="Challenges-and-Motivation"><a href="#Challenges-and-Motivation" class="headerlink" title="Challenges and Motivation"></a>Challenges and Motivation</h2><p>N-Day 漏洞的“窗口期”来自内核生态的<strong>补丁传播延迟</strong>。上游主线修复后，补丁需要逐级向下游 <code>stable/LTS</code> 分支和发行版内核移植，这一过程往往耗时数十天，部分补丁甚至因遗漏而滞留超过半年。在此背景下，攻击者可以在补丁已公开但下游尚未修复的间隙分析漏洞、开发利用。因此自动化 PoC 生成具有双重意义：一是攻击方降低利用门槛，同时也促使防守方加速漏洞分诊与补丁优先级判断。</p>
+<p>但内核 PoC 生成远比用户态困难：内核极其庞大、接口异构（ioctl、netlink 等格式差异巨大）、高度有状态且多线程，多数漏洞需要多个系统调用甚至竞态条件才能触发。该工作的出发点为检验当前 LLM 智能体是否已经跨过这个门槛。</p>
+<h2 id="K-Repro-系统设计"><a href="#K-Repro-系统设计" class="headerlink" title="K-Repro 系统设计"></a>K-Repro 系统设计</h2><p>本文构建了 K-Repro —— 一个以安全补丁 commit ID 为唯一外部输入的端到端智能体系统，其工作流程为：给定补丁 commit 后让系统提取补丁内容，接着用确定性、非 LLM 流水线准备复现环境（补丁前一个 commit 的内核源码与可运行镜像），然后使用 LLM 智能体在工具集辅助下迭代分析、构造 PoC、验证崩溃，最后输出 PoC、分析报告与日志。</p>
 <p><img src="/images/k-repro/1.png" srcset="/img/loading.gif" lazyload alt="Figure 1: Overall Architecture"></p>
 <p>核心能力模块：</p>
 <ul>
@@ -542,27 +544,233 @@
 <li><strong>交互</strong>：通过命令行工具与内核子系统交互</li>
 <li><strong>调试</strong>：使用 GDB 设置断点、检查变量状态</li>
 </ul>
-<p>在系统设计中存在一个关键选择：环境准备交付给确定流水线，而 LLM 仅<strong>负责理解补丁和构造触发</strong>这个认知密集型环节，保证了实验的可复现性，同时清晰地划定了 LLM 的贡献边界。</p>
-<h2 id="Experiment-Design-and-Reustlt"><a href="#Experiment-Design-and-Reustlt" class="headerlink" title="Experiment Design and Reustlt"></a>Experiment Design and Reustlt</h2><p><strong>数据集</strong>：来源于 Google KernelCTF 的 100 个真实可利用 Linux 内核漏洞<br><strong>模型</strong>：GPT-5.1 Codex（Medium 推理级别）与 GPT-5.1 Codex Max（XHigh 推理级别）。<br><strong>整体成功率</strong>：K-Repro 在 XHigh 配置下成功复现 56&#x2F;100（56%），Medium 配置下 47&#x2F;100（47%），均以“生成的 PoC 触发内核崩溃”为成功标准。</p>
-<p><strong>与 SyzDirect 的对比</strong>（在可构建环境的 85 个案例上）：  </p>
+<p>在系统设计中存在一个关键选择：环境准备交付给确定性流水线，而 LLM 仅<strong>负责理解补丁和构造触发</strong>这个认知密集型环节，保证了实验的可复现性，同时清晰地划定了 LLM 的贡献边界。</p>
+<h2 id="Experiment-Design-and-Result"><a href="#Experiment-Design-and-Result" class="headerlink" title="Experiment Design and Result"></a>Experiment Design and Result</h2><p><strong>数据集</strong>：来源于 Google KernelCTF 的 100 个真实可利用 Linux 内核漏洞。<br><strong>模型</strong>：GPT-5.1 Codex（Medium 推理级别）与 GPT-5.1 Codex Max（XHigh 推理级别）。<br><strong>整体成功率</strong>：K-Repro 在 XHigh 配置下成功复现 56&#x2F;100（56%），Medium 配置下 47&#x2F;100（47%），均以“生成的 PoC 触发内核崩溃”为成功标准。</p>
 <blockquote>
-<p>Table 9 summarizes the comparison results. On the 85-case<br>aligned dataset, the LLM-centric approach, as instantiated by<br>K-REPRO (XHigh), successfully reproduces 57 vulnerabilities, corresponding to a success rate of 67.1%. In contrast, the<br>fuzzing-centric approach represented by SyzDirect reports<br>42 successful reproductions out of 100 cases in its original<br>evaluation.</p>
+<p><strong>口径提示</strong>：56% &#x2F; 47% 是 KernelCTF <strong>全集 100 案例</strong>口径；下文与 SyzDirect 对比的 67.1% 是<strong>可构建环境的 85 案例子集</strong>口径，两者不可混用。</p>
+</blockquote>
+<p><strong>成本与耗时</strong>（Table 1，全集口径）：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>成功率</th>
+<th>平均成本</th>
+<th>平均耗时</th>
+<th>成功案例平均耗时</th>
+<th>失败案例平均耗时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Medium</td>
+<td>47&#x2F;100 (47.0%)</td>
+<td>$4.66</td>
+<td>33.80 min</td>
+<td>18.67 min</td>
+<td>47.22 min</td>
+</tr>
+<tr>
+<td>XHigh</td>
+<td>56&#x2F;100 (56.0%)</td>
+<td>$4.02</td>
+<td>19.33 min</td>
+<td>11.89 min</td>
+<td>28.81 min</td>
+</tr>
+</tbody></table>
+<p>从失败案例的耗时分布看，XHigh 的长尾明显更短：Medium 失败案例最长可达 299.7 min、成本 $31.3，而 XHigh 失败案例最长 70.7 min、成本 $10.9（Figure 2）。据此推测更强的模型在复杂任务中更“止损及时”，但这是<strong>笔者的解读</strong>，论文本身只报告了数字。</p>
+<p><strong>与 SyzDirect 的对比</strong>（在可构建环境的 85 个案例上）：</p>
+<blockquote>
+<p>Table 9 summarizes the comparison results. On the 85-case aligned dataset, the LLM-centric approach, as instantiated by K-REPRO (XHigh), successfully reproduces 57 vulnerabilities, corresponding to a success rate of 67.1%. In contrast, the fuzzing-centric approach represented by SyzDirect reports 42 successful reproductions out of 100 cases in its original evaluation.</p>
 </blockquote>
 <p><img src="/images/k-repro/2.png" srcset="/img/loading.gif" lazyload alt="Table 9: Performance comparison between K-REPRO (XHigh) and SyzDirect."></p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>成功率</th>
+<th>成功案例平均耗时</th>
+<th>整体平均耗时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>K-Repro (XHigh)</td>
+<td>57&#x2F;85 (67.1%)</td>
+<td>17.04 min</td>
+<td>22.48 min</td>
+</tr>
+<tr>
+<td>SyzDirect</td>
+<td>42&#x2F;100 (42.0%)</td>
+<td>11.74 h</td>
+<td>18.85 h</td>
+</tr>
+</tbody></table>
+<p>K-Repro 在 85 案例子集上的平均成本为 $2.19&#x2F;案例，成功案例平均 $1.58&#x2F;案例。</p>
 <p>结论：K-Repro 的成功率显著高于 SyzDirect，且耗时从小时级压缩到分钟级。</p>
-<h2 id="Key-Findings"><a href="#Key-Findings" class="headerlink" title="Key Findings"></a>Key Findings</h2><h3 id="4-1-复现并非仅单次尝试"><a href="#4-1-复现并非仅单次尝试" class="headerlink" title="4.1 复现并非仅单次尝试"></a>4.1 复现并非仅单次尝试</h3><p>智能体几乎不依赖单次尝试成功，而是通过多轮迭代逐步精炼 PoC。如观察GDB 的使用模式中，XHigh 在 62&#x2F;100 案例中设置断点，其中 59 次断点被成功命中；即使在失败的 29 个 XHigh 案例中，断点也全部命中过。这说明<strong>可达性通常不是瓶颈</strong>，智能体能够到达目标代码区域，失败更多发生在触发条件构造与状态控制环节。</p>
-<p>GDB 的使用方式以变量检查为主（XHigh 平均 5.4 次&#x2F;案例），指令级 stepping 几乎不用（全程仅 3 次）。智能体偏好<strong>在关键点观察状态</strong>，而非逐指令跟踪。</p>
-<h3 id="子系统与漏洞类型的影响"><a href="#子系统与漏洞类型的影响" class="headerlink" title="子系统与漏洞类型的影响"></a>子系统与漏洞类型的影响</h3><p>按内核子系统分组，成功率差异在统计上不显著，其中 net、netfilter、bpf 的 p 值均较高，表现出 K-Repro 具有一定的泛化能力，没有严重偏科某一子系统；但竞态条件漏洞是明显短板，其中 Medium 在竞态类漏洞上成功率仅 5&#x2F;24（20.8%），远低于整体水平。这符合直觉——竞态触发需要精确的时序控制，而当前智能体的交互模式（命令行调用 + GDB 断点）对多线程时序的操控能力有限。</p>
-<h3 id="工具与提示词的影响：成功率稳定，但执行路径改变"><a href="#工具与提示词的影响：成功率稳定，但执行路径改变" class="headerlink" title="工具与提示词的影响：成功率稳定，但执行路径改变"></a>工具与提示词的影响：成功率稳定，但执行路径改变</h3><p>论文做了两组消融，结果值得关注：</p>
-<h4 id="提示词降级"><a href="#提示词降级" class="headerlink" title="提示词降级"></a>提示词降级</h4><p>当提示词中去掉了有关鼓励“形成假设并验证”等内容后，整体成功率下降不显著（XHigh 从 56% 降至 50%，p&#x3D;0.17），但 GDB 使用模式剧烈变化，其中成功案例中 GDB 断点使用从 33 次骤降到 5 次，失败案例中反而仍有 16 次，体现出提示词变化让模型对于调试的态度从假设验证转为被动应对。</p>
-<h4 id="移除子系统命令行工具（nft、tc）"><a href="#移除子系统命令行工具（nft、tc）" class="headerlink" title="移除子系统命令行工具（nft、tc）"></a>移除子系统命令行工具（nft、tc）</h4><p>成功率变化同样不显著（XHigh 从 56% 降至 46%，p&#x3D;0.20），但 PoC 的形态完全改变。原本成功 PoC 大量依赖 nft&#x2F;tc（XHigh: 31&#x2F;56），但工具移除后几乎消失（2&#x2F;46），智能体转而直接在 C 代码中构造 netlink&#x2F;netfilter 消息、调用系统调用。文献中的一个典型案例展示了这种适应能力：智能体最初 netlink 消息构造错误，转而用 nft 绕过；nft 不可用后，它回头阅读 <code>nfnetlink_rcv_batch</code> 源码，修正了 C 实现并成功触发。</p>
-<p>这两组消融的共同启示：LLM 智能体的“成功率”对工具和提示词有一定鲁棒性，但成功路径的可解释性和效率会显著变化。工具和提示词的作用更多是引导智能体走更理性的分析路线，而非直接决定能否成功。</p>
+<blockquote>
+<p><strong>数据集构成差异</strong>：KernelCTF 数据集中<strong>仅 3 个案例</strong>与 Syzbot 可发现的漏洞重叠。Syzbot 数据集天然排除了复杂竞态和状态累积型漏洞，这是 XHigh 在 SyzDirect 数据集上成功率（67.1%）明显高于 KernelCTF（56%）的关键原因。</p>
+</blockquote>
+<h2 id="Key-Findings"><a href="#Key-Findings" class="headerlink" title="Key Findings"></a>Key Findings</h2><h3 id="4-1-复现并非仅单次尝试"><a href="#4-1-复现并非仅单次尝试" class="headerlink" title="4.1 复现并非仅单次尝试"></a>4.1 复现并非仅单次尝试</h3><p>智能体几乎不依赖单次尝试成功，而是通过多轮迭代逐步精炼 PoC。XHigh 平均每案例尝试生成 PoC 7.4 次（成功案例 4.9 次），Medium 9.1 次（成功案例 4.5 次）。一次性成功的比例不高：XHigh 10.7%、Medium 21.3%。一次性成功的案例中，XHigh 3&#x2F;6、Medium 3&#x2F;10 对应知识截止日期之后的补丁，说明这些成功不太可能纯靠记忆已知 PoC。</p>
+<p>GDB 的使用模式印证了迭代特征：XHigh 在 62&#x2F;100 案例中设置断点，其中 59 次断点被成功命中；<strong>即使在失败的 29 个 XHigh 案例中，断点也全部命中过</strong>。Medium 为 60&#x2F;100 设断点、54 次命中，失败案例中 22 个设断点的有 18 个命中。这说明<strong>可达性通常不是瓶颈</strong>，智能体能够到达目标代码区域，失败更多发生在触发条件构造与状态控制环节。</p>
+<p>GDB 的使用方式以变量检查为主（XHigh 平均 5.4 次&#x2F;案例、Medium 4.4 次），指令级 stepping 几乎不用（全程仅 3 次）。智能体偏好<strong>在关键点观察状态</strong>，而非逐指令跟踪。</p>
+<p>论文还发现 4 例智能体通过 GDB 直接修改执行行为（改内核内存或调用内核函数）制造“假崩溃”，此类“作弊”案例被计为失败。</p>
+<h3 id="4-2-子系统、漏洞类型与-commit-message-的影响"><a href="#4-2-子系统、漏洞类型与-commit-message-的影响" class="headerlink" title="4.2 子系统、漏洞类型与 commit message 的影响"></a>4.2 子系统、漏洞类型与 commit message 的影响</h3><p><strong>子系统</strong>：按内核子系统分组，成功率差异在统计上不显著——net 的 Fisher 检验 p&#x3D;1.000（XHigh）&#x2F;1.000（Medium），netfilter p&#x3D;0.676&#x2F;0.526，bpf p&#x3D;1.000&#x2F;0.703。K-Repro 具有一定的泛化能力，没有严重偏科某一子系统。一个可能解释是这些子系统在野利用中被大量针对，公开文档与利用技术充足。</p>
+<p><strong>Table 3中表现出 K-REPRO 在竞态条件漏洞利用方面存在明显短板</strong>，造成这一现象主要取决于竞态触发需要精确的时序控制，而当前智能体的交互模式（命令行调用 + GDB 断点）对多线程时序的操控能力有限。</p>
+<p><img src="/images/k-repro/3.png" srcset="/img/loading.gif" lazyload alt="Table 3: Statistics on concurrency’s impact on success rate."></p>
+<table>
+<thead>
+<tr>
+<th>漏洞类型</th>
+<th>Medium</th>
+<th>XHigh</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>竞态</td>
+<td>5&#x2F;24 (20.8%)</td>
+<td>7&#x2F;24 (29.2%)</td>
+</tr>
+<tr>
+<td>非竞态</td>
+<td>42&#x2F;76 (55.3%)</td>
+<td>49&#x2F;76 (64.5%)</td>
+</tr>
+</tbody></table>
+<p><strong>时序内存漏洞（UAF&#x2F;DF）显著难于空间内存漏洞（OOB）</strong>。由于竞态在两类漏洞中分布不均（UAF&#x2F;DF 中 26.8% 是竞态，OOB 中仅 6.3%），论文用分层分析 + Mantel-Haenszel 估计 + CMH 检验控制混杂因素：race-adjusted OR（UAF&#x2F;DF vs OOB）为 0.13（p&#x3D;0.002，Medium）和 0.20（p&#x3D;0.023，XHigh）。即使排除竞态因素，时序内存漏洞仍统计显著地更难复现。</p>
+<p><strong>Commit message 的信息量</strong>（Table 5，三级分类）：</p>
+<p><img src="/images/k-repro/4.png" srcset="/img/loading.gif" lazyload alt="Table 5: Reproduction success rates under different commitmessage disclosure levels."></p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+<th>XHigh</th>
+<th>Medium</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Type 1</td>
+<td>不承认存在可触发问题（如仅描述代码简化）</td>
+<td>6&#x2F;13 (46.2%)</td>
+<td>3&#x2F;13 (23.1%)</td>
+</tr>
+<tr>
+<td>Type 2</td>
+<td>承认存在问题但不描述复现方法</td>
+<td>44&#x2F;79 (55.7%)</td>
+<td>38&#x2F;79 (48.1%)</td>
+</tr>
+<tr>
+<td>Type 3</td>
+<td>明确承认并给出具体触发步骤</td>
+<td>6&#x2F;8 (75.0%)</td>
+<td>6&#x2F;8 (75.0%)</td>
+</tr>
+</tbody></table>
+<p>信息越丰富成功率越高，但 Type 2 占绝大多数且仍有 55.7%，说明复现并不依赖直接照抄 commit message 中的复现指令。</p>
+<h3 id="4-3-知识截止日期：排除了依靠记忆的解释"><a href="#4-3-知识截止日期：排除了依靠记忆的解释" class="headerlink" title="4.3 知识截止日期：排除了依靠记忆的解释"></a>4.3 知识截止日期：排除了依靠记忆的解释</h3><p>模型知识截止日期为 2024-09-30。按补丁提交时间划分：pre-cutoff 58 例、post-cutoff 42 例。论文先验证两组的主要混杂因素分布均衡：竞态比例 24.1% vs 23.8%（OR&#x3D;0.98, p&#x3D;1.00），OOB 比例 15.5% vs 17.5%（OR&#x3D;1.15, p&#x3D;0.789）。</p>
+<table>
+<thead>
+<tr>
+<th>分组</th>
+<th>Medium</th>
+<th>XHigh</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pre-cutoff</td>
+<td>28&#x2F;58 (48.3%)</td>
+<td>34&#x2F;58 (58.6%)</td>
+</tr>
+<tr>
+<td>Post-cutoff</td>
+<td>19&#x2F;42 (45.2%)</td>
+<td>22&#x2F;42 (52.4%)</td>
+</tr>
+<tr>
+<td>Fisher 检验</td>
+<td>OR&#x3D;1.13, p&#x3D;0.84</td>
+<td>OR&#x3D;1.29, p&#x3D;0.55</td>
+</tr>
+</tbody></table>
+<p>两组差异均<strong>不显著</strong>，结合 4.1 中一次性成功案例的分析，文献用统计检验排除了<strong>性能主要来自记忆公开 PoC</strong>的解释。</p>
+<h3 id="4-4-稳定性与收敛"><a href="#4-4-稳定性与收敛" class="headerlink" title="4.4 稳定性与收敛"></a>4.4 稳定性与收敛</h3><p>第二次运行（XHigh，相同设置）：成功率 56.0% → 52.0%，平均耗时 19.33 → 22.85 min（约 18% 波动），平均成本差异 &lt;5%。两次运行中，11 例仅首次成功、7 例仅第二次成功，<strong>至少一次成功共 63&#x2F;100</strong>。</p>
+<p>收敛性：对两次都失败的案例迭代补跑，第三次额外成功 1 例，后续不再新增。**聚合成功率收敛于 64%**。结论：单次额外重复可显著提升整体成功率，更多重复收益递减。</p>
+<h3 id="4-5-工具与提示词消融：成功率稳定，但执行路径改变"><a href="#4-5-工具与提示词消融：成功率稳定，但执行路径改变" class="headerlink" title="4.5 工具与提示词消融：成功率稳定，但执行路径改变"></a>4.5 工具与提示词消融：成功率稳定，但执行路径改变</h3><p>论文做了四组消融（提示词降级、移除 nft&#x2F;tc、移除 GDB、移除 commit message），前三组对成功率的影响均不显著，但执行轨迹变化明显。</p>
+<h4 id="提示词降级"><a href="#提示词降级" class="headerlink" title="提示词降级"></a>提示词降级</h4><p>去掉鼓励“形成假设并验证”的高层指令后，成功率下降不显著：Medium 47.0% → 46.0%（OR&#x3D;0.96, p&#x3D;0.31），XHigh 56.0% → 50.0%（OR&#x3D;0.79, p&#x3D;0.17）。</p>
+<p>但 GDB 使用模式剧烈变化（成功案例 vs 失败案例的断点使用次数）：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>基线（成功&#x2F;失败）</th>
+<th>降级后（成功&#x2F;失败）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Medium</td>
+<td>38 &#x2F; 22</td>
+<td>1 &#x2F; 8</td>
+</tr>
+<tr>
+<td>XHigh</td>
+<td>33 &#x2F; 29</td>
+<td>5 &#x2F; 16</td>
+</tr>
+</tbody></table>
+<p>降级后 GDB 在成功案例中几乎消失、集中到失败案例，说明调试从“验证假设”退化为“遇到困难才用”。源码浏览调用也分别减少 6.5 次&#x2F;案例（Medium）和 6.0 次&#x2F;案例（XHigh）。</p>
+<h4 id="移除子系统命令行工具（nft、tc）"><a href="#移除子系统命令行工具（nft、tc）" class="headerlink" title="移除子系统命令行工具（nft、tc）"></a>移除子系统命令行工具（nft、tc）</h4><p>成功率变化不显著：XHigh 56.0% → 46.0%（OR&#x3D;0.67, p&#x3D;0.20），Medium 47.0% → 50.0%（OR&#x3D;1.13, p&#x3D;0.78）。</p>
+<p>但 PoC 形态完全改变：原本成功 PoC 大量依赖 nft&#x2F;tc（XHigh 31&#x2F;56、Medium 27&#x2F;47），工具移除后几乎消失（XHigh 2&#x2F;46、Medium 1&#x2F;50）。成功 PoC 中 netlink&#x2F;netfilter&#x2F;traffic control 相关头文件的使用频率上升（Table 7），智能体转而直接在 C 代码中构造消息、调用系统调用。同时源码浏览增加（Medium +14.3 次&#x2F;案例、XHigh +5.2 次&#x2F;案例），VM 交互减少（Medium −10.5、XHigh −20.7）。</p>
+<p>典型案例如 commit 317eb968：智能体最初 netlink 消息构造错误，转而用 nft 绕过；nft 不可用后，它回头阅读 <code>nfnetlink_rcv_batch</code> 源码，识别分发逻辑，修正 C 实现并成功触发。</p>
+<h4 id="移除-GDB"><a href="#移除-GDB" class="headerlink" title="移除 GDB"></a>移除 GDB</h4><p>成功率几乎不受影响：Medium 不变，XHigh 仅降 1 个百分点。论文未发现智能体使用 kprobe&#x2F;ftrace&#x2F;eBPF 等替代可见性机制（这些设施在环境中被禁用）。对 10 个“用 GDB 成功”的 XHigh 案例的人工检查发现：GDB 主要用于确认 PoC 可达性或观察关键内核值，<strong>很少带来 PoC 的实质性修正</strong>——它更多是在 reaffirm 已经合理的假设，对竞态类漏洞帮助尤其有限。</p>
+<h4 id="移除-commit-message"><a href="#移除-commit-message" class="headerlink" title="移除 commit message"></a>移除 commit message</h4><p>成功率显著下降：XHigh 39.0%、Medium 36.0%。按披露类型分层（Table 8，Δ &#x3D; 无 commit message 减有 commit message，括号内为 discordant pairs b&#x2F;c）：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>XHigh</th>
+<th>Medium</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Type 1 (n&#x3D;13)</td>
+<td>0.0% (1&#x2F;1)</td>
+<td>+7.7% (0&#x2F;1)</td>
+</tr>
+<tr>
+<td>Type 2 (n&#x3D;79)</td>
+<td>−19.0% (19&#x2F;4)</td>
+<td>−12.7% (16&#x2F;6)</td>
+</tr>
+<tr>
+<td>Type 3 (n&#x3D;8)</td>
+<td>−25.0% (3&#x2F;1)</td>
+<td>−25.0% (2&#x2F;0)</td>
+</tr>
+</tbody></table>
+<p>信息越丰富的 commit message，移除后损失越大；但即使完全移除，整体成功率仍有 36%–39%，说明智能体并非依赖 commit message 才能工作。</p>
+<p><strong>共同启示</strong>：LLM 智能体的“成功率”对工具和提示词有一定鲁棒性，但<strong>成功路径的可解释性和效率</strong>会显著变化。工具和提示词的作用更多是引导智能体走更理性的分析路线，而非直接决定能否成功。相比之下，<strong>commit message 是唯一对成功率有实质影响的外部信号</strong>。</p>
+<h2 id="失败分析（第-7-节）"><a href="#失败分析（第-7-节）" class="headerlink" title="失败分析（第 7 节）"></a>失败分析（第 7 节）</h2><p>论文对“在所有设置下都从未成功”且有 KernelCTF writeup 的 <strong>13 个案例</strong>做了人工分析：</p>
+<ul>
+<li><strong>3 例</strong>环境相关问题（如内核配置差异）</li>
+<li><strong>2 例</strong>无法在短竞态窗口内达成竞态</li>
+<li><strong>8 例</strong>根因分析错误或不完整（最主要、最普遍）</li>
+</ul>
+<p><strong>Case Study I（commit e26d3009）——补丁信号误导导致根因定位失败</strong>：patch 明确禁止 <code>struct nft_set</code> 的一条 deactivation 路径，commit message 提到“anonymous sets”。智能体据此推断漏洞是对 <code>nft_set</code> 的 UAF（GC 工作线程持有 stale pointer），全力复现却无法触发。人工分析表明实际 corruption 目标是另一个相关对象 <code>struct nft_chain</code>，但 patch 和 message 都没提。启示：补丁信号质量低甚至误导时，当前方案不足以可靠定位根因，未来需要<strong>假设多样化、外部刺激（如静态分析线索）、早期证伪循环</strong>。</p>
+<p><strong>Case Study II（commit 13114dc5）——忽视关键源码导致根因分析失败</strong>：触发需要内核选择队列式 crypto backend（如 cryptd）以在高并发下产生 backlog。只有“XHigh + 降级提示词”的智能体成功——因为它深入 <code>crypto/</code> 子系统查找 backlog 行为，发现其依赖具体 crypto 实现，并主动强制使用队列式 backend。其他智能体只查看 <code>include/</code> 下的接口级定义，未识别 crypto backend 选择这一关键控制点。启示：未来设计应引导智能体分析补丁隐含的<strong>触发链</strong>，而非依赖随机源码探索。</p>
 <h2 id="个人理解与启示"><a href="#个人理解与启示" class="headerlink" title="个人理解与启示"></a>个人理解与启示</h2><ol>
-<li><p>对自主安全智能体设计：K-Repro 的架构选择——确定性环境准备 + LLM 聚焦认知任务——是一个值得借鉴的范式。它把不可靠的环节（环境构建）与 LLM 的不确定性解耦，使得实验结果可归因。同时提示词消融的结果说明，<strong>鼓励假设-验证循环</strong>的提示设计是让智能体行为更像安全研究员的关键，即便它不直接提升成功率，也改变了调试的行为。</p>
+<li><p><strong>对自主安全智能体设计</strong>：K-Repro 的架构选择——确定性环境准备 + LLM 聚焦认知任务——是一个值得借鉴的范式。它把不可靠的环节（环境构建）与 LLM 的不确定性解耦，使得实验结果可归因。消融结果进一步说明：工具（nft&#x2F;tc、GDB）对成功率影响有限，但会改变执行路径；提示词的作用是让调试行为“假设驱动”而非“被动应对”；<strong>commit message 才是唯一显著影响成功率的外部信号</strong>。这对实际部署有直接含义——在 commit message 缺失的场景（如 Android OEM 内核），预期性能会下降约 17 个百分点（XHigh 56% → 39%）。</p>
 </li>
-<li><p>对 N-day 攻防评估：50%+ 的复现率在分钟级、数美元成本下实现，意味着补丁公开后的自动化利用开发门槛正在实质性下降。但竞态漏洞的低成功率（20.8%）提供了一个暂时的缓冲带，防守方至少可以在竞态类漏洞上争取更多窗口。不过这个缓冲带能维持多久，取决于后续工作能否在时序控制上取得突破。</p>
+<li><p><strong>对 N-day 攻防评估</strong>：50%+ 的复现率在分钟级、数美元成本下实现，意味着补丁公开后的自动化利用开发门槛正在实质性下降。但竞态漏洞的低成功率（20.8% &#x2F; 29.2%）和时序内存漏洞的显著劣势（race-adjusted OR 0.13 &#x2F; 0.20）提供了一个暂时的缓冲带——防守方至少可以在竞态类漏洞和 UAF&#x2F;DF 上争取更多窗口。不过这个缓冲带能维持多久，取决于后续工作能否在时序控制上取得突破。</p>
 </li>
-<li><p>局限与开放问题：论文的成功标准是触发崩溃，而非实现可控利用，在真实场景下从崩溃到实际可利用（控制流劫持、提权）之间仍有距离。此外，模型知识截止日期对结果的影响论文有讨论（4.5 节），但未改变整体结论。竞态漏洞的瓶颈是否源于工具集限制（缺乏精确时序操控手段）还是 LLM 本身的多线程推理能力，值得进一步拆解。</p>
+<li><p><strong>局限与开放问题</strong>：</p>
+<ul>
+<li>论文的成功标准是“触发内核崩溃”，而非实现可控利用。从崩溃到实际可利用（控制流劫持、提权）之间仍有距离，论文也承认因内核漏洞的多行为特性，难以自动验证崩溃的根因等价性（因此对 XHigh 成功案例做了人工检查，并显式排除 4 例 GDB 作弊）。</li>
+<li>竞态漏洞的瓶颈是否源于工具集限制（缺乏精确时序操控手段）还是 LLM 本身的多线程推理能力，论文未做拆解，值得进一步研究。</li>
+<li>失败分析显示 8&#x2F;13 的持续失败源于根因分析错误，而根因分析高度依赖 patch 与 commit message 的信号质量——如何在低质量信号下做假设多样化与早期证伪，是下一代智能体的核心挑战。</li>
+<li>SyzDirect 对比受限于其无法应用于较新内核，只能在 85 案例子集上对齐；且两数据集构成差异显著（仅 3 例重叠），对比结论应理解为“两种范式的效率画像差异”，而非严格的同分布性能排名。</li>
+</ul>
 </li>
 </ol>
 
@@ -635,7 +843,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>更新于</div>
-          <div>2026年11月9日</div>
+          <div>2026年11月10日</div>
         </div>
       
       
